@@ -22,7 +22,7 @@ export function DesktopNavigation() {
           </div>
           <div>
             <span className="text-xl font-bold text-[var(--color-secondary)] tracking-tight block leading-tight">
-              IshTop
+              HamJoy
             </span>
             <span className="text-[10px] font-medium text-[var(--color-success)] uppercase tracking-wider">
               Ish topish oson

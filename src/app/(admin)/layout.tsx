@@ -3,7 +3,7 @@ import { AdminShell } from '@/components/admin/AdminShell';
 
 export const metadata = createPageMetadata({
   title: 'Admin',
-  description: 'JobMarket administration panel.',
+  description: 'HamJoy administration panel.',
   path: '/admin',
   noIndex: true,
 });

@@ -8,7 +8,7 @@ const STEPS: { id: CreateJobStep; label: string }[] = [
   { id: 1, label: 'Asosiy' },
   { id: 2, label: 'Tafsilot' },
   { id: 3, label: 'Joylashuv' },
-  { id: 4, label: 'Eʼlon' },
+  { id: 4, label: 'E\'lon' },
 ];
 
 interface StepProgressProps {
@@ -19,41 +19,41 @@ interface StepProgressProps {
 export function StepProgress({ currentStep, onStepClick }: StepProgressProps) {
   return (
     <nav aria-label="Create job progress" className="w-full">
-      <ol className="flex items-center justify-between gap-1 sm:gap-2">
+      <ol className="flex items-start justify-between gap-1 sm:gap-2">
         {STEPS.map((step, index) => {
           const isComplete = step.id < currentStep;
           const isCurrent = step.id === currentStep;
           const isClickable = Boolean(onStepClick) && step.id <= currentStep;
 
           return (
-            <li key={step.id} className="flex flex-1 items-center min-w-0">
+            <li key={step.id} className="flex min-w-0 flex-1 items-center">
               <button
                 type="button"
                 disabled={!isClickable}
                 onClick={() => isClickable && onStepClick?.(step.id)}
                 className={cn(
-                  'flex flex-col items-center gap-1.5 w-full min-w-0 group',
+                  'group flex w-full min-w-0 flex-col items-center gap-1.5',
                   isClickable ? 'cursor-pointer' : 'cursor-default'
                 )}
                 aria-current={isCurrent ? 'step' : undefined}
               >
                 <span
                   className={cn(
-                    'w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold border-2 transition-colors shrink-0',
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-all',
                     isComplete &&
-                      'bg-[var(--color-success)] border-[var(--color-success)] text-white',
+                      'border-[var(--color-success)] bg-[var(--color-success)] text-white',
                     isCurrent &&
-                      'bg-[var(--color-primary)] border-[var(--color-primary)] text-white',
+                      'border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-md shadow-blue-500/20',
                     !isComplete &&
                       !isCurrent &&
-                      'bg-white border-[var(--color-border)] text-[var(--color-muted)]'
+                      'border-[var(--color-border)] bg-white text-[var(--color-muted)]'
                   )}
                 >
-                  {isComplete ? <Check className="w-4 h-4" /> : step.id}
+                  {isComplete ? <Check className="h-4 w-4" /> : step.id}
                 </span>
                 <span
                   className={cn(
-                    'text-[10px] sm:text-xs font-medium truncate w-full text-center',
+                    'w-full truncate text-center text-[10px] font-semibold sm:text-xs',
                     isCurrent ? 'text-[var(--color-primary)]' : 'text-[var(--color-muted)]'
                   )}
                 >
@@ -64,7 +64,7 @@ export function StepProgress({ currentStep, onStepClick }: StepProgressProps) {
               {index < STEPS.length - 1 && (
                 <div
                   className={cn(
-                    'h-0.5 flex-1 mx-0.5 sm:mx-1 rounded-full min-w-[8px]',
+                    'mt-4 h-0.5 min-w-[10px] flex-1 rounded-full',
                     step.id < currentStep ? 'bg-[var(--color-success)]' : 'bg-[var(--color-border)]'
                   )}
                   aria-hidden

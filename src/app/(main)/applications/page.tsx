@@ -3,7 +3,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = createPageMetadata({
   title: 'Mening arizalarim',
-  description: "IshTop orqali yuborgan ish arizalaringizni kuzating.",
+  description: "HamJoy orqali yuborgan ish arizalaringizni kuzating.",
   path: '/applications',
   noIndex: true,
 });

@@ -111,6 +111,7 @@ export const mockAuthRepository: AuthRepository = {
 
   onAuthStateChanged(callback) {
     const handler = () => callback(authStore.getSession());
+    queueMicrotask(handler);
     window.addEventListener('storage', handler);
     return () => window.removeEventListener('storage', handler);
   },

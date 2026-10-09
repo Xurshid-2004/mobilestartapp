@@ -7,7 +7,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
       <header className="border-b border-[var(--color-border)] bg-white">
         <div className="page-container py-4 flex items-center justify-between gap-4">
           <Link href={ROUTES.home} className="text-sm font-semibold text-[var(--color-primary)]">
-            ← Back to JobMarket
+            ← Back to HamJoy
           </Link>
           <nav className="flex gap-4 text-sm">
             <Link href="/legal/privacy" className="text-[var(--color-muted)] hover:text-[var(--color-primary)]">

@@ -26,7 +26,10 @@ async function fetchAllJobs(): Promise<Job[]> {
     return firebaseJobsRepository.getAll();
   }
   const userJobs = typeof window !== 'undefined' ? userJobsStore.getAll() : [];
-  const merged = [...userJobs, ...jobsData]
+  // userJobsStore entries override seed jobs with the same id (e.g. an edited
+  // seed listing), so dedupe by id keeping the user copy.
+  const userJobIds = new Set(userJobs.map((j) => j.id));
+  const merged = [...userJobs, ...jobsData.filter((j) => !userJobIds.has(j.id))]
     .map((job) => jobModerationStore.applyToJob(job))
     .filter((job): job is Job => job !== null);
   return merged;
@@ -117,6 +120,38 @@ export const jobsService = {
       return firebaseJobsRepository.insert(job);
     }
     return userJobsStore.add(job);
+  },
+
+  /** Edit an existing listing from the wizard form, preserving identity/status. */
+  async updateFromForm(id: string, data: CreateJobFormData): Promise<Job> {
+    const existing = await this.getByIdAsync(id);
+    const draft = createJobFormToEntity(data);
+    const updated: Job = {
+      ...draft,
+      id,
+      posterId: existing?.posterId ?? draft.posterId,
+      // Preserve identity/branding/status — the wizard only edits the content.
+      companyName: existing?.companyName ?? draft.companyName,
+      companyLogo: existing?.companyLogo ?? draft.companyLogo,
+      companyId: existing?.companyId ?? draft.companyId,
+      status: existing?.status ?? draft.status,
+      isFeatured: existing?.isFeatured ?? draft.isFeatured,
+      createdAt: existing?.createdAt ?? draft.createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (isRestBackendEnabled()) {
+      const { restJobsRepository } = await import('@/lib/rest/repositories/jobs.repository');
+      return restJobsRepository.update(id, updated);
+    }
+    if (isBackendEnabled()) {
+      return firebaseJobsRepository.insert(updated);
+    }
+    // Mock: upsert into the user store so it overrides any seed listing by id.
+    if (userJobsStore.getById(id)) {
+      return userJobsStore.update(id, updated) ?? updated;
+    }
+    return userJobsStore.add(updated);
   },
 
   async getSearchFacets() {
@@ -280,8 +315,9 @@ export const jobsService = {
       await firebaseJobsRepository.delete(id);
       return;
     }
-    if (!userJobsStore.remove(id)) {
-      jobModerationStore.markDeleted(id);
-    }
+    // Remove a user/edited copy if present, and mark seed jobs deleted so they
+    // don't reappear from the static dataset.
+    userJobsStore.remove(id);
+    jobModerationStore.markDeleted(id);
   },
 };

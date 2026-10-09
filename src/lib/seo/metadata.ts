@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 
 import { getSiteUrl } from '@/lib/site-url';
 
-const SITE_NAME = 'IshTop';
+const SITE_NAME = 'HamJoy';
 const SITE_DESCRIPTION =
-  "IshTop — O'zbekistondagi ishlarni xaritadan toping, e'lon joylang va ish beruvchilar bilan bevosita bog'laning.";
+  "HamJoy — O'zbekistonda uy-joy ijarasi va savdosi, ish qidirish va e'lon joylash uchun yagona platforma.";
 
 export const siteConfig = {
   name: SITE_NAME,

@@ -3,7 +3,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = createPageMetadata({
   title: 'Bildirishnomalar',
-  description: 'IshTop bildirishnomalari — arizalar, xabarlar va mos ishlar.',
+  description: 'HamJoy bildirishnomalari — arizalar, xabarlar va mos ishlar.',
   path: '/notifications',
   noIndex: true,
 });

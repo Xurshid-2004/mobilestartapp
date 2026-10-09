@@ -16,7 +16,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
           <div className="w-11 h-11 bg-[var(--color-primary)] text-white rounded-xl flex items-center justify-center shadow-md">
             <Briefcase className="w-6 h-6" />
           </div>
-          <span className="text-xl font-bold text-[var(--color-secondary)]">IshTop</span>
+          <span className="text-xl font-bold text-[var(--color-secondary)]">HamJoy</span>
         </Link>
 
         <div className="card p-6 sm:p-8">

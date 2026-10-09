@@ -1,4 +1,4 @@
-/** Lightweight cookies read by Next.js middleware for route protection. */
+/** Lightweight cookies read by Next.js proxy for route protection. */
 export const AUTH_SESSION_COOKIE = 'jm-session';
 export const AUTH_ROLE_COOKIE = 'jm-role';
 

@@ -24,6 +24,7 @@ export default function SearchContent() {
   useScrollRestore();
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category') ?? undefined;
+  const queryParam = searchParams.get('q') ?? undefined;
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const {
@@ -47,7 +48,7 @@ export default function SearchContent() {
     clearFilters,
     replaceParams,
     refetch,
-  } = useJobSearch(categoryParam);
+  } = useJobSearch(categoryParam, queryParam);
 
   const handleRefresh = useCallback(async () => {
     await refetch();

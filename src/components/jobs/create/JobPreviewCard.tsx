@@ -19,7 +19,7 @@ export function JobPreviewCard({ job, className }: JobPreviewCardProps) {
       )}
     >
       <span className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary-light)] px-2 py-0.5 rounded-md">
-        Preview
+        Ko'rinish
       </span>
 
       <div className="flex justify-between items-start gap-3 mb-3.5">
@@ -29,7 +29,7 @@ export function JobPreviewCard({ job, className }: JobPreviewCardProps) {
           </div>
           <div className="min-w-0 pr-16">
             <h3 className="font-semibold text-[var(--color-secondary)] text-base sm:text-lg truncate">
-              {job.title || 'Job title'}
+              {job.title || 'E\'lon sarlavhasi'}
             </h3>
             <p className="text-[var(--color-muted)] text-sm truncate">{job.company}</p>
           </div>
@@ -45,10 +45,10 @@ export function JobPreviewCard({ job, className }: JobPreviewCardProps) {
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-muted)] mb-3.5">
         <span className="inline-flex items-center gap-1">
           <MapPin className="w-3.5 h-3.5 text-[var(--color-primary)]" />
-          {job.location || 'Location'}
+          {job.location || 'Joylashuv'}
         </span>
         <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
-        <span className="font-semibold text-[var(--color-success)]">{job.salary || 'Salary'}</span>
+        <span className="font-semibold text-[var(--color-success)]">{job.salary || 'Maosh'}</span>
         <span className="w-1 h-1 rounded-full bg-gray-300 hidden sm:block" />
         <span className="inline-flex items-center gap-1 text-xs">
           <Clock className="w-3.5 h-3.5" />

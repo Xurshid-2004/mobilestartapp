@@ -60,4 +60,6 @@ export interface JobListItem {
   region?: string;
   /** Distance in km from the user — present only in nearby/geo results */
   distanceKm?: number;
+  /** Poster's contact phone, revealed by the card's "Telefon" button */
+  contactPhone?: string;
 }

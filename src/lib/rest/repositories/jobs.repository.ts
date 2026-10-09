@@ -165,6 +165,14 @@ export const restJobsRepository = {
     return mapJob(data);
   },
 
+  async update(id: string, job: Job): Promise<Job> {
+    const data = await apiFetch<RestJob>(API_ENDPOINTS.job(id), {
+      method: 'PATCH',
+      body: JSON.stringify(mapJobPayload(job)),
+    });
+    return mapJob(data);
+  },
+
   async updateStatus(id: string, status: JobStatus): Promise<void> {
     await apiFetch(API_ENDPOINTS.job(id), {
       method: 'PATCH',

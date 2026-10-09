@@ -2,7 +2,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = createPageMetadata({
   title: 'Terms of Service',
-  description: 'Terms and conditions for using the JobMarket platform.',
+  description: 'Terms and conditions for using the HamJoy platform.',
   path: '/legal/terms',
 });
 
@@ -14,7 +14,7 @@ export default function TermsPage() {
 
       <section className="space-y-4 text-[var(--color-secondary)]">
         <p>
-          By using JobMarket you agree to these terms. If you do not agree, do not use the
+          By using HamJoy you agree to these terms. If you do not agree, do not use the
           service.
         </p>
 
@@ -39,7 +39,7 @@ export default function TermsPage() {
 
         <h2 className="text-xl font-semibold mt-8">Limitation of liability</h2>
         <p>
-          JobMarket is provided &quot;as is&quot;. We are not a party to employment agreements
+          HamJoy is provided &quot;as is&quot;. We are not a party to employment agreements
           between users. Use listings and messages at your own discretion.
         </p>
 

@@ -19,6 +19,7 @@ import { UserAvatar } from '@/components/profile/UserAvatar';
 import { NotificationSettingsPanel } from '@/components/profile/NotificationSettingsPanel';
 import { LanguageSelector } from '@/components/profile/LanguageSelector';
 import { useAuth } from '@/context/AuthContext';
+import { isAuthOptional } from '@/lib/auth/config';
 import { LANGUAGE_LABELS } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -140,7 +141,7 @@ export function SettingsContent() {
         </p>
       </div>
 
-      {isAuthenticated ? (
+      {isAuthOptional() ? null : isAuthenticated ? (
         <button
           type="button"
           onClick={handleLogout}

@@ -20,16 +20,20 @@ export function useNearbyJobs(center: MapCoordinates | null, radiusKm = 15) {
 
 export function useJobs(filters: JobFilters | JobSearchParams = {}) {
   const { favoriteIds } = useFavorites();
+  // Callers often pass inline objects (`useJobs({})`); depending on the object
+  // identity would refetch after every render and loop forever. Key by value.
+  const filtersKey = JSON.stringify(filters);
 
   return useAsyncQuery(
     () => jobsService.searchJobs(favoriteIds, filters),
-    [favoriteIds, filters],
+    [favoriteIds, filtersKey],
     [] as JobListItem[]
   );
 }
 
 export function useJobCount(filters: JobFilters = {}) {
-  return useAsyncQuery(() => jobsService.countJobs(filters), [filters], 0);
+  const filtersKey = JSON.stringify(filters);
+  return useAsyncQuery(() => jobsService.countJobs(filters), [filtersKey], 0);
 }
 
 export function useFeaturedJobs(limit = 2) {

@@ -16,7 +16,7 @@ import type {
   UserProfileUpdate,
 } from '@/types';
 import { authService } from '@/services/auth.service';
-import { isMockAuthEnabled } from '@/lib/auth/config';
+import { isMockAuthEnabled, isAuthOptional } from '@/lib/auth/config';
 import { isAdminUser } from '@/lib/auth/roles';
 
 interface AuthContextValue {
@@ -117,7 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       user,
       session,
-      isAuthenticated: Boolean(session),
+      // Auth is optional during early dev — treat everyone as signed in (demo
+      // user) so no screen ever forces sign-in/registration.
+      isAuthenticated: isAuthOptional() || Boolean(session),
       isHydrated,
       isMockAuth: isMockAuthEnabled(),
       isAdmin: isAdminUser(user),

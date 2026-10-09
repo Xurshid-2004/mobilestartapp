@@ -31,7 +31,7 @@ export function validateRegister(
     errors.confirmPassword = 'Passwords do not match';
   }
 
-  if (!credentials.profileRole) errors.profileRole = 'Select how you will use JobMarket';
+  if (!credentials.profileRole) errors.profileRole = 'Select how you will use HamJoy';
 
   return errors;
 }

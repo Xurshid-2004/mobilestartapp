@@ -60,6 +60,26 @@ export function createJobFormToEntity(data: CreateJobFormData): Job {
   };
 }
 
+/** Reverse of createJobFormToEntity — pre-fill the wizard when editing a listing. */
+export function jobToFormData(job: Job): CreateJobFormData {
+  return {
+    title: job.title,
+    categoryId: job.categoryId,
+    workType: job.workType,
+    scheduleType: job.scheduleType,
+    salaryMin: job.salaryMin ? String(job.salaryMin) : '',
+    salaryMax: job.salaryMax ? String(job.salaryMax) : '',
+    description: job.description,
+    responsibilities: (job.responsibilities ?? []).join('\n'),
+    requirements: (job.requirements ?? []).join('\n'),
+    phone: job.contactPhone ?? '',
+    address: job.address ?? job.location.address ?? '',
+    cityDistrict: job.district ?? job.location.city ?? (job.location.isRemote ? '' : job.location.label) ?? '',
+    mapLat: job.location.lat,
+    mapLng: job.location.lng,
+  };
+}
+
 export function formDataToPreviewItem(data: CreateJobFormData, savedJobIds: Set<string>): JobListItem {
   const entity = createJobFormToEntity(data);
   entity.id = 'job-preview';

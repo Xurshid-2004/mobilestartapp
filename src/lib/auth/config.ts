@@ -22,3 +22,12 @@ export const AUTH_PROVIDER: AuthProviderId = getActiveAuthProvider();
 export function isMockAuthEnabled(): boolean {
   return getActiveAuthProvider() === 'mock';
 }
+
+/**
+ * Auth is intentionally OFF during early development: nobody is ever asked to
+ * sign in or register, and everyone browses as the demo user. Flip it back on
+ * later by setting NEXT_PUBLIC_ENABLE_AUTH=true.
+ */
+export function isAuthOptional(): boolean {
+  return process.env.NEXT_PUBLIC_ENABLE_AUTH !== 'true';
+}

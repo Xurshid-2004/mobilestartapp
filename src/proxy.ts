@@ -17,8 +17,21 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Auth disabled during early development: no route is gated, and the marketing
+  // landing is skipped so visitors land straight on the jobs feed. Re-enable by
+  // setting NEXT_PUBLIC_ENABLE_AUTH=true.
+  if (process.env.NEXT_PUBLIC_ENABLE_AUTH !== 'true') {
+    if (pathname === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/home';
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
   const hasSession = request.cookies.get(AUTH_SESSION_COOKIE)?.value === '1';
   const role = request.cookies.get(AUTH_ROLE_COOKIE)?.value;
 
@@ -44,6 +57,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/admin/:path*',
     '/create',
     '/favorites',

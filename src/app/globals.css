@@ -23,6 +23,64 @@
   --shadow-nav: 0 -4px 24px rgb(0 0 0 / 0.06);
 }
 
+/* Brand (from the logo) + the platform navbar. Plain :root (not @theme) so the
+   variables are always emitted — Tailwind tree-shakes unused @theme vars.
+   The navbar is white by default and dark when <html data-theme="dark">. */
+:root {
+  --color-brand-green: #1F6B3F;
+  --color-brand-gold: #D9B25F;
+  --color-brand-gold-light: #F3DE9C;
+
+  --nav-bg: #FFFFFF;
+  --nav-fg: #0B0B0C;
+  --nav-fg-muted: #0B0B0C;
+  --nav-fg-subtle: #4B5160; /* descriptions/placeholder; ≥7:1 on white */
+  --nav-hover: #EAF4EE; /* light brand-green tint */
+  --nav-hover-fg: #1F6B3F; /* brand green */
+  --nav-field: #F3F4F6;
+  --nav-field-focus: #FFFFFF;
+  --nav-border: #E5E7EB;
+  --nav-panel: #FFFFFF;
+  /* Gold is too light on white, so light mode accents use the brand green. */
+  --nav-accent: #1F6B3F;
+  --nav-shadow: rgb(15 23 42 / 0.12);
+  --nav-tab-open-border: #E5E7EB;
+
+  /* Hero carousel price badge */
+  --brand-primary: #0F766E;
+  --brand-on: #FFFFFF;
+}
+
+:root[data-theme="dark"] {
+  --nav-bg: #141517;
+  --nav-fg: #FFFFFF;
+  --nav-fg-muted: rgb(255 255 255 / 0.75);
+  --nav-fg-subtle: rgb(255 255 255 / 0.6); /* ≥6:1 on bg and panels */
+  --nav-hover: rgb(95 191 132 / 0.12);
+  --nav-hover-fg: #6FCF97;
+  --nav-field: #232428;
+  --nav-field-focus: #2A2B30;
+  --nav-border: rgb(255 255 255 / 0.08);
+  --nav-panel: #232428;
+  --nav-accent: #D9B25F;
+  --nav-shadow: rgb(0 0 0 / 0.45);
+  --nav-tab-open-border: transparent;
+
+  --brand-primary: #2DD4BF;
+  --brand-on: #042F2A;
+}
+
+/* Hero carousel entrance */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-up { animation: none; }
+}
+
 @layer base {
   body {
     background-color: var(--color-background);

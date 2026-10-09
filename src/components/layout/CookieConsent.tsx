@@ -13,6 +13,9 @@ export function CookieConsent() {
 
   useEffect(() => {
     if (localStorage.getItem(CONSENT_KEY) !== 'accepted') {
+      // Intentional: localStorage is client-only, so we defer reading it to
+      // after mount to keep SSR and the first client render identical.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(true);
     }
   }, []);

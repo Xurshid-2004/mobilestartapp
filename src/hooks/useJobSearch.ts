@@ -18,7 +18,7 @@ import {
   countActiveFilters,
 } from '@/lib/filters/job-search';
 
-export function useJobSearch(initialCategorySlug?: string) {
+export function useJobSearch(initialCategorySlug?: string, initialQuery?: string) {
   const { favoriteIds } = useFavorites();
 
   const categoriesQuery = useAsyncQuery(
@@ -38,8 +38,19 @@ export function useJobSearch(initialCategorySlug?: string) {
 
   const [params, setParams] = useState<JobSearchParams>({
     ...DEFAULT_SEARCH_PARAMS,
+    query: initialQuery ?? DEFAULT_SEARCH_PARAMS.query,
     categoryId: initialCategory?.id,
   });
+
+  // Categories load async, so `initialCategory` is undefined on the first render.
+  // Apply the `?category=` slug once it resolves (state adjustment during render).
+  const [appliedCategorySlug, setAppliedCategorySlug] = useState<string | undefined>(
+    initialCategory ? initialCategorySlug : undefined
+  );
+  if (initialCategory && appliedCategorySlug !== initialCategorySlug) {
+    setAppliedCategorySlug(initialCategorySlug);
+    setParams((p) => ({ ...p, categoryId: initialCategory.id }));
+  }
 
   const [viewMode, setViewMode] = useState<SearchViewMode>('list');
 

@@ -2,7 +2,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = createPageMetadata({
   title: 'Privacy Policy',
-  description: 'How JobMarket collects, uses, and protects your personal information.',
+  description: 'How HamJoy collects, uses, and protects your personal information.',
   path: '/legal/privacy',
 });
 
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
 
       <section className="space-y-4 text-[var(--color-secondary)]">
         <p>
-          JobMarket (&quot;we&quot;, &quot;our&quot;) provides a job listing and messaging platform.
+          HamJoy (&quot;we&quot;, &quot;our&quot;) provides a job listing and messaging platform.
           This policy explains what data we process when you use our website and services.
         </p>
 
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-xl font-semibold mt-8">Contact</h2>
-        <p>For privacy requests, email: privacy@jobmarket.example</p>
+        <p>For privacy requests, email: privacy@hamjoy.example</p>
       </section>
     </div>
   );

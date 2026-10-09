@@ -9,7 +9,7 @@ function seed(): AppNotification[] {
     {
       id: 'seed-welcome',
       kind: 'system',
-      title: 'IshTop’ga xush kelibsiz! 🎉',
+      title: 'HamJoy’ga xush kelibsiz! 🎉',
       body: 'Yaqinimdagi ishlar bo‘limidan eng yaqin ishlarni toping.',
       link: '/map',
       read: false,

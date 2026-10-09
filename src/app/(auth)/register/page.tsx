@@ -5,7 +5,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = createPageMetadata({
   title: 'Roʻyxatdan oʻtish',
-  description: "IshTop'da ish izlovchi yoki ish beruvchi sifatida roʻyxatdan oʻting.",
+  description: "HamJoy'da ish izlovchi yoki ish beruvchi sifatida roʻyxatdan oʻting.",
   path: '/register',
   noIndex: true,
 });

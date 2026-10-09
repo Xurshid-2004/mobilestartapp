@@ -9,11 +9,15 @@ import {
   Map,
   FileText,
   Users,
+  Briefcase,
 } from 'lucide-react';
 
 /** Single source of truth for app paths — avoids typos and eases Django deep-link parity later. */
 export const ROUTES = {
+  /** Platform hub — every section (Uy-joy, Ish, Account) branches out from here. */
   home: '/home',
+  /** Ish (jobs) section landing. */
+  jobs: '/ish',
   search: '/search',
   map: '/map',
   favorites: '/favorites',
@@ -39,7 +43,7 @@ export interface NavItemConfig {
 
 export const MOBILE_NAV_ITEMS: NavItemConfig[] = [
   { href: ROUTES.home, icon: Home, label: 'Asosiy' },
-  { href: ROUTES.map, icon: Map, label: 'Xarita' },
+  { href: ROUTES.jobs, icon: Briefcase, label: 'Ishlar' },
   { href: ROUTES.create, icon: Plus, label: 'Joylash', isCenter: true },
   { href: ROUTES.chat, icon: MessageCircle, label: 'Suhbat' },
   { href: ROUTES.settings, icon: Settings, label: 'Sozlama' },
@@ -47,6 +51,7 @@ export const MOBILE_NAV_ITEMS: NavItemConfig[] = [
 
 export const DESKTOP_NAV_ITEMS: NavItemConfig[] = [
   { href: ROUTES.home, icon: Home, label: 'Bosh sahifa' },
+  { href: ROUTES.jobs, icon: Briefcase, label: 'Ishlar' },
   { href: ROUTES.search, icon: Search, label: 'Qidiruv' },
   { href: ROUTES.map, icon: Map, label: 'Xarita' },
   { href: ROUTES.favorites, icon: Bookmark, label: 'Saqlangan' },

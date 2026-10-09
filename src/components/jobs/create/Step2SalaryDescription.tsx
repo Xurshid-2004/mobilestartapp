@@ -3,6 +3,7 @@
 import type { CreateJobFormData, CreateJobFormErrors } from '@/types';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
+import { parseLines } from '@/lib/validations/create-job.validation';
 import { DollarSign } from 'lucide-react';
 
 interface Step2SalaryDescriptionProps {
@@ -12,23 +13,25 @@ interface Step2SalaryDescriptionProps {
 }
 
 export function Step2SalaryDescription({ form, errors, onChange }: Step2SalaryDescriptionProps) {
-  const salaryLabel = 'Oylik maosh (USD)';
+  const responsibilityCount = parseLines(form.responsibilities).length;
+  const requirementCount = parseLines(form.requirements).length;
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold text-[var(--color-secondary)]">Maosh va tavsif</h2>
-        <p className="text-sm text-[var(--color-muted)] mt-1">
-          Maoshni belgilang va lavozimni aniq tavsiflang.
+    <div className="space-y-6">
+      <div className="rounded-2xl border border-orange-100 bg-orange-50/70 px-4 py-3">
+        <h2 className="text-lg font-bold text-[var(--color-secondary)]">Maosh va tavsif</h2>
+        <p className="mt-1 text-sm leading-6 text-[var(--color-muted)]">
+          Nomzod ish sharoiti, maosh va vazifalarni tez tushunishi uchun qisqa, lekin aniq
+          yozing.
         </p>
       </div>
 
       <div>
-        <p className="text-sm font-medium text-[var(--color-secondary)] mb-1.5 flex items-center gap-1">
-          <DollarSign className="w-3.5 h-3.5 text-[var(--color-success)]" />
-          {salaryLabel}
+        <p className="mb-2 flex items-center gap-1 text-sm font-semibold text-[var(--color-secondary)]">
+          <DollarSign className="h-3.5 w-3.5 text-[var(--color-success)]" />
+          Oylik maosh oralig'i (USD)
         </p>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input
             label="Dan"
             type="number"
@@ -52,31 +55,32 @@ export function Step2SalaryDescription({ form, errors, onChange }: Step2SalaryDe
 
       <Textarea
         label="Tavsif"
-        rows={4}
-        placeholder="Lavozim, jamoa va kutilayotgan natijalarni yozing..."
+        rows={5}
+        placeholder="Ish joyi, sharoitlar, kimni izlayotganingiz va asosiy vazifalarni yozing..."
         value={form.description}
         onChange={(e) => onChange('description', e.target.value)}
         error={errors.description}
-        hint={`${form.description.trim().length} ta belgi · kamida 20`}
+        hint={`${form.description.trim().length} ta belgi / kamida 20`}
       />
+
       <Textarea
         label="Majburiyatlar"
-        rows={4}
-        placeholder={'Har bir qatorga bitta band\nmasalan, Dizayn ko‘riklarini boshqarish\nMuhandislar bilan hamkorlik'}
+        rows={5}
+        placeholder={'Har bir qatorga bitta band yozing\nMasalan: Mijozlarga xizmat ko\'rsatish\nMahsulotlarni tartibga keltirish'}
         value={form.responsibilities}
         onChange={(e) => onChange('responsibilities', e.target.value)}
         error={errors.responsibilities}
-        hint="Har bir qatorga bitta band"
+        hint={`${responsibilityCount} ta band / har bir qatorga bitta band`}
       />
 
       <Textarea
         label="Talablar"
-        rows={4}
-        placeholder={'Har bir qatorga bitta talab\nmasalan, 3+ yil UX tajriba\nPortfolio talab qilinadi'}
+        rows={5}
+        placeholder={'Har bir qatorga bitta talab yozing\nMasalan: Mas\'uliyatli va hushmuomala bo\'lish\nShu sohada tajriba bo\'lishi'}
         value={form.requirements}
         onChange={(e) => onChange('requirements', e.target.value)}
         error={errors.requirements}
-        hint="Har bir qatorga bitta band"
+        hint={`${requirementCount} ta band / har bir qatorga bitta talab`}
       />
     </div>
   );

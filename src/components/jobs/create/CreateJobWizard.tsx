@@ -18,7 +18,7 @@ const stepVariants = {
   exit: { opacity: 0, x: -16 },
 };
 
-export function CreateJobWizard() {
+export function CreateJobWizard({ editJobId }: { editJobId?: string }) {
   const router = useRouter();
   const {
     form,
@@ -26,44 +26,58 @@ export function CreateJobWizard() {
     step,
     stepMeta,
     isSubmitting,
+    isEditing,
+    isLoading,
     updateField,
     updateFields,
     goNext,
     goBack,
     goToStep,
     submit,
-  } = useCreateJob();
+  } = useCreateJob(editJobId);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-[var(--color-muted)]">
+        Yuklanmoqda…
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] flex flex-col">
-      <header className="bg-white border-b border-[var(--color-border)] px-4 sm:px-6 py-4 sticky top-0 z-20">
-        <div className="max-w-lg mx-auto">
-          <div className="flex items-center justify-between gap-3 mb-4">
+    <div className="flex min-h-screen flex-col bg-[var(--color-background)]">
+      <header className="sticky top-0 z-20 border-b border-[var(--color-border)] bg-white/95 px-4 py-4 shadow-sm backdrop-blur sm:px-6">
+        <div className="mx-auto max-w-2xl">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold text-[var(--color-secondary)] truncate">
-                Ish joylash
+              <h1 className="truncate text-xl font-black text-[var(--color-secondary)] sm:text-2xl">
+                {isEditing ? 'Eʼlonni tahrirlash' : 'Ish joylash'}
               </h1>
-              <p className="text-xs text-[var(--color-muted)]">
+              <p className="mt-1 text-sm font-medium text-[var(--color-muted)]">
                 {stepMeta.current}-qadam / {stepMeta.total} · {stepMeta.label}
               </p>
             </div>
             <button
               type="button"
               onClick={() => router.back()}
-              className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-[var(--color-muted)] hover:bg-gray-200 transition-colors shrink-0"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-[var(--color-muted)] transition-colors hover:bg-gray-200"
               aria-label="Close"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
           <StepProgress currentStep={step} onStepClick={goToStep} />
         </div>
       </header>
 
-      <div className="flex-1 p-4 sm:p-6 overflow-y-auto pb-32">
-        <div className="max-w-lg mx-auto">
-          <div className="card p-5 sm:p-6">
-            <FormErrorSummary errors={errors} className="mb-4" />
+      <div className="flex-1 overflow-y-auto px-4 py-5 pb-44 sm:px-6 sm:py-7 sm:pb-48">
+        <div className="mx-auto max-w-2xl">
+          <div className="card rounded-[1.75rem] p-5 sm:p-7">
+            <FormErrorSummary
+              errors={errors}
+              className="mb-5"
+              title="Quyidagi maydonlarni tekshiring"
+            />
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
@@ -94,8 +108,8 @@ export function CreateJobWizard() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 backdrop-blur-md border-t border-[var(--color-border)] z-30 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-lg mx-auto flex gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--color-border)] bg-white/95 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur-md sm:p-6">
+        <div className="mx-auto flex max-w-2xl gap-3">
           {!stepMeta.isFirst ? (
             <Button variant="outline" className="flex-1" onClick={goBack} disabled={isSubmitting}>
               Orqaga
@@ -118,7 +132,7 @@ export function CreateJobWizard() {
               onClick={submit}
               isLoading={isSubmitting}
             >
-              Eʼlonni joylash
+              {isEditing ? 'Saqlash' : 'Eʼlonni joylash'}
             </Button>
           ) : (
             <Button variant="accent" className="flex-[2]" onClick={goNext}>

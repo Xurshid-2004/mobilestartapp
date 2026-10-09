@@ -10,6 +10,7 @@ import { users as seedUsers } from '@/data/users';
 import { DEFAULT_NOTIFICATION_SETTINGS } from '@/types';
 import { isBackendEnabled } from '@/lib/backend/config';
 import { isRestBackendEnabled } from '@/lib/api/config';
+import { isAuthOptional } from '@/lib/auth/config';
 import {
   clearAuthSessionCookies,
   syncAuthSessionCookies,
@@ -62,12 +63,14 @@ export const authService = {
   getOptionalUserId(): string | null {
     const sessionUserId = authStore.getSession()?.userId;
     if (sessionUserId) return sessionUserId;
+    if (isAuthOptional()) return DEFAULT_DEMO_USER_ID;
     return isBackendEnabled() || isRestBackendEnabled() ? null : DEFAULT_DEMO_USER_ID;
   },
 
   getCurrentUserId(): string {
     const sessionUserId = authStore.getSession()?.userId;
     if (sessionUserId) return sessionUserId;
+    if (isAuthOptional()) return DEFAULT_DEMO_USER_ID;
     if (isBackendEnabled() || isRestBackendEnabled()) {
       throw new Error('Authentication required');
     }

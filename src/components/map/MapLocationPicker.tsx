@@ -23,14 +23,16 @@ export function MapLocationPicker({ lat, lng, disabled, onSelect }: MapLocationP
     : [];
 
   return (
-    <div className={cn(disabled && 'opacity-60 pointer-events-none')}>
-      <p className="text-sm font-medium text-[var(--color-secondary)] mb-1.5">Map location</p>
+    <div className={cn(disabled && 'pointer-events-none opacity-60')}>
+      <p className="mb-1.5 text-sm font-medium text-[var(--color-secondary)]">
+        Xaritadagi joylashuv
+      </p>
 
       {disabled ? (
         <div className="rounded-xl border border-[var(--color-border)] bg-gray-50 p-6 text-center">
-          <MapPin className="w-8 h-8 text-[var(--color-muted)] mx-auto mb-2" />
+          <MapPin className="mx-auto mb-2 h-8 w-8 text-[var(--color-muted)]" />
           <p className="text-sm text-[var(--color-muted)]">
-            Map picker is not needed for fully remote roles.
+            Masofaviy ish uchun xaritada nuqta tanlash shart emas.
           </p>
         </div>
       ) : (
@@ -43,16 +45,16 @@ export function MapLocationPicker({ lat, lng, disabled, onSelect }: MapLocationP
             showHeader={false}
             showLegend={false}
             showProviderBadge
-            className="aspect-[16/10] sm:aspect-[2/1] min-h-0"
+            className="aspect-[16/10] min-h-0 sm:aspect-[2/1]"
           />
           <p className="mt-2 text-xs text-[var(--color-muted)]">
             {hasSelection ? (
               <>
-                Selected: {lat!.toFixed(4)}, {lng!.toFixed(4)} — demo coordinates until a map API is
-                connected.
+                Tanlandi: {lat!.toFixed(4)}, {lng!.toFixed(4)}. Hozircha demo koordinatalar
+                ishlatiladi.
               </>
             ) : (
-              <>Tap a point on the map to set a demo location (placeholder).</>
+              <>Joylashuvni belgilash uchun xaritadagi nuqtalardan birini tanlang.</>
             )}
           </p>
         </>

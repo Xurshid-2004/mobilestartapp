@@ -5,7 +5,7 @@ import { createPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata = createPageMetadata({
   title: 'Kirish',
-  description: "Profilingiz, xabarlar va eʼlonlaringizni boshqarish uchun IshTop'ga kiring.",
+  description: "Profilingiz, xabarlar va eʼlonlaringizni boshqarish uchun HamJoy'ga kiring.",
   path: '/login',
   noIndex: true,
 });

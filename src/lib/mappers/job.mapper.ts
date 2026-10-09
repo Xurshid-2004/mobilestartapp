@@ -46,6 +46,17 @@ export function deriveRegion(job: Job): string | undefined {
   return label.includes(',') ? label.split(',')[0].trim() : label || undefined;
 }
 
+const UZ_PREFIXES = ['90', '91', '93', '94', '95', '97', '98', '99', '88', '33'];
+
+/** Stable demo phone for seed jobs without an explicit contact number. */
+export function demoPhone(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  const prefix = UZ_PREFIXES[hash % UZ_PREFIXES.length];
+  const n = (hash % 10000000).toString().padStart(7, '0');
+  return `+998 ${prefix} ${n.slice(0, 3)} ${n.slice(3, 5)} ${n.slice(5, 7)}`;
+}
+
 export function toJobListItem(job: Job, savedJobIds: Set<string>): JobListItem {
   return {
     id: job.id,
@@ -70,6 +81,7 @@ export function toJobListItem(job: Job, savedJobIds: Set<string>): JobListItem {
     lng: job.location.lng,
     isRemote: job.location.isRemote,
     region: deriveRegion(job),
+    contactPhone: job.contactPhone?.trim() || demoPhone(job.id),
   };
 }
 

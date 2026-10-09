@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { JobListItem } from '@/types';
-import { Bookmark, MapPin, Clock, Star } from 'lucide-react';
+import { Bookmark, MapPin, Clock, Star, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -30,6 +30,18 @@ export function JobCard({ job, index = 0, featured }: JobCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const isSaved = isFavorite(job.id);
   const showFeatured = featured ?? job.isFeatured;
+  const [showPhone, setShowPhone] = useState(false);
+
+  const handlePhone = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // First tap reveals the number; a second tap places a call.
+    if (!showPhone) {
+      setShowPhone(true);
+    } else if (job.contactPhone) {
+      window.location.href = `tel:${job.contactPhone.replace(/[^\d+]/g, '')}`;
+    }
+  };
 
   const handleSave = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -102,6 +114,22 @@ export function JobCard({ job, index = 0, featured }: JobCardProps) {
             </div>
 
             <div className="flex flex-wrap gap-1.5">
+              {job.contactPhone && (
+                <button
+                  type="button"
+                  onClick={handlePhone}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors',
+                    'bg-[var(--color-success-light)] text-[var(--color-success)] hover:bg-[var(--color-success)]/15'
+                  )}
+                  aria-label={
+                    showPhone ? `Qoʻngʻiroq qilish: ${job.contactPhone}` : 'Telefon raqamini koʻrsatish'
+                  }
+                >
+                  <Phone className="w-3 h-3" />
+                  {showPhone ? job.contactPhone : 'Telefon'}
+                </button>
+              )}
               {showFeatured && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent-light)]">
                   <Star className="w-3 h-3" fill="currentColor" />
