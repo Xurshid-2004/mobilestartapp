@@ -3,15 +3,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, ChevronDown, Map as MapIcon } from 'lucide-react';
+import { ArrowRight, CalendarClock, ChevronDown, Map as MapIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/navigation/routes';
-import { MEGA_MENUS, type MegaMenu } from '@/lib/navigation/mega-menu';
+import { DAILY_JOBS_HREF, MEGA_MENUS, type MegaMenu } from '@/lib/navigation/mega-menu';
 
 const OPEN_DELAY_MS = 90;
 const CLOSE_DELAY_MS = 160;
 
 function MegaPanel({ menu, onNavigate }: { menu: MegaMenu; onNavigate: () => void }) {
+  const [showMore, setShowMore] = useState(false);
   return (
     <div className="px-7 pb-5 pt-6">
       <div
@@ -53,6 +54,39 @@ function MegaPanel({ menu, onNavigate }: { menu: MegaMenu; onNavigate: () => voi
           </div>
         ))}
       </div>
+
+      {menu.more && (
+        <div className="mt-5">
+          <button
+            type="button"
+            aria-expanded={showMore}
+            aria-controls={`mega-more-${menu.id}`}
+            onClick={() => setShowMore((v) => !v)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--color-border)] px-3 text-sm font-semibold text-[var(--color-secondary)] transition-colors hover:border-[var(--color-brand-green)]/40 hover:text-[var(--color-brand-green)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-gold)]/70"
+          >
+            {showMore ? 'Kamroq' : `Yana ${menu.more.length} ta kategoriya`}
+            <ChevronDown className={cn('h-4 w-4 transition-transform', showMore && 'rotate-180')} />
+          </button>
+          {showMore && (
+            <ul
+              id={`mega-more-${menu.id}`}
+              className="mt-3 grid grid-cols-2 gap-x-10 lg:grid-cols-4"
+            >
+              {menu.more.map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    className="-mx-2 block truncate rounded-lg px-2 py-1.5 text-[15px] text-gray-600 transition-colors hover:bg-[var(--color-brand-green)]/[0.06] hover:text-[var(--color-brand-green)] focus-visible:bg-[var(--color-brand-green)]/[0.06] focus-visible:text-[var(--color-brand-green)] focus-visible:outline-none"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="mt-5 flex justify-end border-t border-[var(--color-border)] pt-4">
         <Link
@@ -156,6 +190,14 @@ export function CategoryBar() {
             </button>
           );
         })}
+        <Link
+          href={DAILY_JOBS_HREF}
+          onClick={close}
+          className="relative inline-flex h-12 items-center gap-2 rounded-t-xl border border-b-0 border-transparent px-5 text-[15px] font-bold text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-brand-gold)]/70"
+        >
+          <CalendarClock className="h-[18px] w-[18px] text-[var(--nav-accent)]" />
+          Kunlik ish
+        </Link>
       </nav>
 
       <Link
@@ -195,6 +237,7 @@ export function CategoryBar() {
 /** Same menus as accordions, for the mobile sheet. */
 export function MobileCategoryMenu({ onNavigate }: { onNavigate: () => void }) {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <div className="mt-3 border-t border-[var(--nav-border)] pt-3">
@@ -237,6 +280,30 @@ export function MobileCategoryMenu({ onNavigate }: { onNavigate: () => void }) {
                     ))}
                   </div>
                 ))}
+                {menu.more && (
+                  <div className="py-1.5">
+                    <button
+                      type="button"
+                      aria-expanded={moreOpen}
+                      onClick={() => setMoreOpen((v) => !v)}
+                      className="flex min-h-10 w-full items-center justify-between rounded-lg px-2 text-left text-sm font-semibold text-[var(--nav-accent)] hover:bg-[var(--nav-hover)]"
+                    >
+                      {moreOpen ? 'Kamroq' : `Yana ${menu.more.length} ta kategoriya`}
+                      <ChevronDown className={cn('h-4 w-4 transition-transform', moreOpen && 'rotate-180')} />
+                    </button>
+                    {moreOpen &&
+                      menu.more.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onClick={onNavigate}
+                          className="block rounded-lg px-2 py-2 text-sm text-[var(--nav-fg-muted)] hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                  </div>
+                )}
                 <Link
                   href={menu.href}
                   onClick={onNavigate}
@@ -249,6 +316,14 @@ export function MobileCategoryMenu({ onNavigate }: { onNavigate: () => void }) {
           </div>
         );
       })}
+      <Link
+        href={DAILY_JOBS_HREF}
+        onClick={onNavigate}
+        className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 py-2.5 text-sm font-semibold hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]"
+      >
+        <CalendarClock className="h-4 w-4 text-[var(--nav-accent)]" />
+        Kunlik ish
+      </Link>
     </div>
   );
 }

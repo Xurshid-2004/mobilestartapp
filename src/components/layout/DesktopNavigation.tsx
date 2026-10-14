@@ -3,11 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Briefcase, Plus } from 'lucide-react';
+import { Briefcase } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DESKTOP_NAV_ITEMS, isRouteActive, ROUTES } from '@/lib/navigation/routes';
 import { usersService } from '@/services';
 import { UserAvatar } from '@/components/profile/UserAvatar';
+import { PostListingButton } from '@/components/layout/PostListingButton';
 
 export function DesktopNavigation() {
   const pathname = usePathname();
@@ -32,18 +33,7 @@ export function DesktopNavigation() {
       </div>
 
       <div className="p-4">
-        <Link
-          href={ROUTES.create}
-          className={cn(
-            'flex items-center justify-center gap-2 w-full py-3 text-white rounded-xl font-semibold transition-all',
-            isRouteActive(pathname, ROUTES.create)
-              ? 'bg-orange-600 shadow-lg shadow-orange-500/25'
-              : 'bg-[var(--color-accent)] hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/25'
-          )}
-        >
-          <Plus className="w-5 h-5" strokeWidth={2.5} />
-          <span>Ish joylash</span>
-        </Link>
+        <PostListingButton />
       </div>
 
       <nav className="flex-1 px-3 overflow-y-auto hide-scrollbar" aria-label="Desktop navigation">

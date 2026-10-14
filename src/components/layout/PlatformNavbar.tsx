@@ -5,13 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
 import {
   Bell,
   Briefcase,
   Building2,
   Check,
   ChevronDown,
-  FileUser,
   Globe,
   Heart,
   Menu,
@@ -26,6 +26,8 @@ import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/navigation/routes';
 import { PLATFORM_SECTIONS, type PlatformLink } from '@/lib/navigation/platform';
 import { useNotifications } from '@/context/NotificationsContext';
+import { useFavorites } from '@/context/FavoritesContext';
+import { useAuth } from '@/context/AuthContext';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { appToast } from '@/lib/feedback/toast';
 import { useTheme } from '@/lib/theme';
@@ -33,9 +35,13 @@ import { CategoryBar, MobileCategoryMenu } from '@/components/layout/CategoryBar
 
 /** What can be posted — the gold "Eʼlon joylash" menu. */
 const POST_LINKS: PlatformLink[] = [
-  { label: 'Vakansiya', description: 'Xodim topish uchun ish eʼloni', icon: Briefcase, href: ROUTES.create },
-  { label: 'Uy-joy eʼloni', description: 'Ijaraga berish yoki sotish', icon: Building2 },
-  { label: 'CV', description: 'Rezyumeingizni joylang', icon: FileUser },
+  {
+    label: 'Uy-joy ijara',
+    description: 'Uy-joyni ijaraga bering',
+    icon: Building2,
+    href: `${ROUTES.createListing}&bitim=ijara`,
+  },
+  { label: 'Ish joylash', description: 'Xodim topish uchun vakansiya', icon: Briefcase, href: ROUTES.createJob },
 ];
 
 /** Only Uzbek exists today; RU/EN are listed so the menu shape is final. */
@@ -65,11 +71,14 @@ const panelMotion = {
 const panelClass =
   'absolute top-full z-50 mt-2 rounded-2xl border border-[var(--nav-border)] bg-[var(--nav-panel)] p-1.5 text-[var(--nav-fg)] shadow-[0_18px_45px_-10px_var(--nav-shadow)]';
 
-function Tooltip({ label }: { label: string }) {
+function Tooltip({ label, className }: { label: string; className?: string }) {
   return (
     <span
       role="tooltip"
-      className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[var(--nav-fg)] px-2 py-1 text-xs font-medium text-[var(--nav-bg)] opacity-0 shadow-lg transition-opacity delay-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+      className={cn(
+        'pointer-events-none absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[var(--nav-fg)] px-2 py-1 text-xs font-medium text-[var(--nav-bg)] opacity-0 shadow-lg transition-opacity delay-300 group-hover:opacity-100 group-focus-visible:opacity-100',
+        className
+      )}
     >
       {label}
     </span>
@@ -120,6 +129,66 @@ function MenuLink({ link, onNavigate }: { link: PlatformLink; onNavigate: () => 
   );
 }
 
+/**
+ * Header shortcut: icon + label (+ count), like a store's "Kirish · Saralangan · Savat".
+ * Below xl the label collapses into a tooltip and the count moves onto the icon.
+ */
+function NavAction({
+  href,
+  label,
+  icon: Icon,
+  count = 0,
+  countLabel,
+  active,
+  onClick,
+  className,
+}: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  count?: number;
+  /** Screen-reader suffix for the count, e.g. "ta oʻqilmagan". */
+  countLabel?: string;
+  active: boolean;
+  onClick: () => void;
+  className?: string;
+}) {
+  const badge = count > 99 ? '99+' : String(count);
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      aria-label={count > 0 ? `${label}, ${count} ${countLabel ?? 'ta'}` : label}
+      className={cn(
+        'group relative flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl px-2.5 text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)] xl:px-3',
+        active && 'bg-[var(--nav-hover)] text-[var(--nav-accent)]',
+        focusRing,
+        className
+      )}
+    >
+      <span className="relative flex">
+        <Icon className="h-[22px] w-[22px]" strokeWidth={1.75} />
+        {count > 0 && (
+          <span className="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[10px] font-bold text-white ring-2 ring-[var(--nav-bg)] xl:hidden">
+            {count > 9 ? '9+' : count}
+          </span>
+        )}
+      </span>
+      <span className="hidden whitespace-nowrap text-[15px] font-medium xl:inline">{label}</span>
+      {count > 0 && (
+        <span
+          aria-hidden
+          className="hidden h-5 min-w-5 items-center justify-center rounded-md bg-[var(--color-accent)] px-1.5 text-xs font-bold text-white xl:inline-flex"
+        >
+          {badge}
+        </span>
+      )}
+      <Tooltip label={label} className="xl:hidden" />
+    </Link>
+  );
+}
+
 function NavSearch({
   className,
   onSubmitted,
@@ -165,7 +234,7 @@ function NavSearch({
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Ish, kompaniya yoki eʼlon qidiring..."
+        placeholder="Uy, ish qidiring..."
         aria-label="Qidirish"
         enterKeyHint="search"
         className="h-11 w-full rounded-full border border-[var(--nav-border)] bg-[var(--nav-field)] pl-11 pr-12 text-sm text-[var(--nav-fg)] outline-none transition-[border-color,background-color,box-shadow] placeholder:text-[var(--nav-fg-subtle)] hover:border-[var(--nav-fg-subtle)]/40 focus:border-[var(--color-brand-gold)]/60 focus:bg-[var(--nav-field-focus)] focus:shadow-[0_0_0_4px_rgb(217_178_95/0.12)] [&::-webkit-search-cancel-button]:hidden"
@@ -197,6 +266,8 @@ export function PlatformNavbar() {
   const pathname = usePathname();
   const user = useCurrentUser();
   const { unreadCount } = useNotifications();
+  const { favoriteIds } = useFavorites();
+  const { isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
   const themeLabel = isDark ? 'Kunduzgi rejim' : 'Tungi rejim';
@@ -372,40 +443,42 @@ export function PlatformNavbar() {
           <NavSearch className="mx-3 hidden max-w-2xl flex-1 lg:block" onSubmitted={closeAll} enableShortcut />
 
           <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
-            <Link
+            {isAuthenticated ? (
+              <NavAction
+                href={ROUTES.profile}
+                label="Hisobim"
+                icon={UserRound}
+                active={isActive(ROUTES.profile)}
+                onClick={closeAll}
+              />
+            ) : (
+              <NavAction
+                href={ROUTES.login}
+                label="Kirish"
+                icon={UserRound}
+                active={isActive(ROUTES.login)}
+                onClick={closeAll}
+              />
+            )}
+            <NavAction
               href={ROUTES.favorites}
+              label="Saqlangan"
+              icon={Heart}
+              count={favoriteIds.size}
+              countLabel="ta eʼlon"
+              active={isActive(ROUTES.favorites)}
               onClick={closeAll}
-              aria-label="Saqlanganlar"
-              aria-current={isActive(ROUTES.favorites) ? 'page' : undefined}
-              className={cn(
-                iconButton,
-                'group hidden sm:flex',
-                isActive(ROUTES.favorites) && 'bg-[var(--nav-hover)] text-[var(--nav-accent)]'
-              )}
-            >
-              <Heart className="h-5 w-5" />
-              <Tooltip label="Saqlanganlar" />
-            </Link>
-
-            <Link
-              href="/notifications"
+              className="hidden sm:flex"
+            />
+            <NavAction
+              href={ROUTES.notifications}
+              label="Bildirishnomalar"
+              icon={Bell}
+              count={unreadCount}
+              countLabel="ta oʻqilmagan"
+              active={isActive(ROUTES.notifications)}
               onClick={closeAll}
-              aria-current={isActive('/notifications') ? 'page' : undefined}
-              className={cn(
-                iconButton,
-                'group',
-                isActive('/notifications') && 'bg-[var(--nav-hover)] text-[var(--nav-accent)]'
-              )}
-              aria-label={`Bildirishnomalar${unreadCount > 0 ? `, ${unreadCount} ta oʻqilmagan` : ''}`}
-            >
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[10px] font-bold text-white ring-2 ring-[var(--nav-bg)]">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-              <Tooltip label="Bildirishnomalar" />
-            </Link>
+            />
 
             {/* Post a listing — the primary action */}
             <div className="relative ml-1">
@@ -449,21 +522,6 @@ export function PlatformNavbar() {
                 )}
               </AnimatePresence>
             </div>
-
-            <Link
-              href={ROUTES.profile}
-              onClick={closeAll}
-              aria-label="Profil"
-              aria-current={isActive(ROUTES.profile) ? 'page' : undefined}
-              className={cn(
-                iconButton,
-                'group hidden sm:flex',
-                isActive(ROUTES.profile) && 'bg-[var(--nav-hover)] text-[var(--nav-accent)]'
-              )}
-            >
-              <UserRound className="h-5 w-5" />
-              <Tooltip label="Profil" />
-            </Link>
 
             <button
               type="button"

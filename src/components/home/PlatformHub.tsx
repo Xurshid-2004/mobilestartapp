@@ -1,18 +1,45 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ChevronRight } from 'lucide-react';
-import { PLATFORM_SECTIONS, type PlatformSection } from '@/lib/navigation/platform';
+import { ArrowRight, Search, TrendingUp, MapPin, ChevronRight } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useJobs } from '@/hooks/useJobs';
+import { useJobs, useFeaturedJobs, useRecentJobs } from '@/hooks/useJobs';
+import { useCategories } from '@/hooks/useCategories';
 import { Carousel, type Slide } from '@/components/ui/Carousel';
+import { ListingsSection } from '@/components/listings/ListingsSection';
+import { JobCard } from '@/components/jobs/JobCard';
+import { SearchBar } from '@/components/jobs/SearchBar';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { JobListSkeleton } from '@/components/ui/LoadingState';
+import { QueryErrorBanner } from '@/components/ui/QueryErrorBanner';
 import { ROUTES } from '@/lib/navigation/routes';
 import { cn } from '@/lib/utils';
-import type { JobListItem } from '@/types';
+import type { Category, JobListItem } from '@/types';
 
 const HERO_SLIDE_COUNT = 5;
+
+/** Hand-picked banners shown before the job slides; each opens its own page. */
+const PROMO_SLIDES: (Slide & { href: string })[] = [
+  {
+    id: 'promo-uy-joy',
+    title: 'Orzuingizdagi uyni toping',
+    subtitle: 'Hovli va kvartiralar — sotuv va ijara',
+    image: '/carousel/uy-joy-hovli.webp',
+    cover: true,
+    href: '/uy-joy/sotuv',
+  },
+  {
+    id: 'promo-ish',
+    title: 'Oʻzingizga mos ishni toping',
+    subtitle: 'Qurilish va boshqa sohalardagi vakansiyalar',
+    image: '/carousel/ish-quruvchi.webp',
+    cover: true,
+    coverPosition: 'object-right',
+    href: ROUTES.jobs,
+  },
+];
 
 /** Company "cover" for a slide — jobs have no photos, and logos are too small to upscale. */
 function companyCover(company: string): string {
@@ -46,10 +73,9 @@ function toHeroSlides(jobs: JobListItem[]): Slide[] {
 function HeroCarousel() {
   const router = useRouter();
   const { data: jobs, isLoading } = useJobs();
-  const slides = useMemo(() => toHeroSlides(jobs), [jobs]);
+  const slides = useMemo(() => [...PROMO_SLIDES, ...toHeroSlides(jobs)], [jobs]);
 
   if (isLoading) {
-    // Same footprint as the carousel so the page doesn't jump when it loads.
     return (
       <div
         aria-hidden
@@ -62,129 +88,201 @@ function HeroCarousel() {
     <Carousel
       slides={slides}
       currency="$ gacha"
-      onSlideClick={(id) => router.push(ROUTES.job(String(id)))}
+      onSlideClick={(id) => {
+        const promo = PROMO_SLIDES.find((s) => s.id === id);
+        router.push(promo ? promo.href : ROUTES.job(String(id)));
+      }}
     />
   );
 }
 
-function SectionCard({ section }: { section: PlatformSection }) {
-  const Icon = section.icon;
-  const isReady = Boolean(section.href);
-
+/** Category chip filter — horizontal scrollable list */
+function CategoryChips({
+  categories,
+  selected,
+  onSelect,
+}: {
+  categories: Category[];
+  selected: string | null;
+  onSelect: (id: string | null) => void;
+}) {
   return (
-    <article id={section.id} className="card flex flex-col p-5 sm:p-6">
-      <div className="mb-4 flex items-start gap-3">
-        <span
+    <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-1 -mx-1 px-1">
+      <button
+        type="button"
+        onClick={() => onSelect(null)}
+        className={cn(
+          'whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all shrink-0',
+          selected === null
+            ? 'bg-[var(--color-primary)] text-white shadow-sm'
+            : 'bg-white text-[var(--color-muted)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40'
+        )}
+      >
+        Barchasi
+      </button>
+      {categories.map((cat) => (
+        <button
+          key={cat.id}
+          type="button"
+          onClick={() => onSelect(cat.id === selected ? null : cat.id)}
           className={cn(
-            'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl',
-            section.tone
+            'whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold transition-all shrink-0',
+            selected === cat.id
+              ? 'bg-[var(--color-primary)] text-white shadow-sm'
+              : 'bg-white text-[var(--color-muted)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/40'
           )}
         >
-          <Icon className="h-6 w-6" />
+          {cat.name}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** Ish e'lonlari bo'limi — featured + tanlangan kategoriya bo'yicha filtrlash */
+function JobsSection() {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const categoriesResult = useCategories();
+  const featured = useFeaturedJobs(2);
+  const recent = useRecentJobs(8);
+
+  const categories = categoriesResult.data;
+
+  // Filter jobs by selected category
+  const filteredJobs = useMemo(() => {
+    if (!selectedCategory) return recent.data;
+    return recent.data.filter((job) => job.categoryId === selectedCategory);
+  }, [recent.data, selectedCategory]);
+
+  const isLoading = featured.isLoading || recent.isLoading || categoriesResult.isLoading;
+  const error = featured.error ?? recent.error ?? categoriesResult.error;
+
+  const refreshAll = useCallback(async () => {
+    await Promise.all([featured.refetch(), recent.refetch(), categoriesResult.refetch()]);
+  }, [featured, recent, categoriesResult]);
+
+  return (
+    <section className="mt-6 sm:mt-8">
+      {/* Search bar — links to full search page */}
+      <div className="mb-5">
+        <SearchBar asLink placeholder="Ish, kompaniya yoki koʻnikma qidiring..." />
+      </div>
+
+      {/* Map link */}
+      <Link
+        href="/map"
+        className="mb-6 flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-white p-3.5 shadow-[var(--shadow-card)] transition-colors hover:border-[var(--color-primary)]/30"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary-light)] text-[var(--color-primary)]">
+          <MapPin className="h-5 w-5" />
         </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-[var(--color-secondary)]">{section.title}</h2>
-            {!isReady && (
-              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-[var(--color-muted)]">
-                Tez orada
-              </span>
-            )}
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold text-[var(--color-secondary)]">
+            Yaqinimdagi ishlar
+          </span>
+          <span className="block truncate text-xs text-[var(--color-muted)]">
+            Xaritadan eng yaqin ishlarni toping
+          </span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-[var(--color-muted)]" />
+      </Link>
+
+      {/* Trending banner */}
+      <div className="mb-6 rounded-2xl bg-gradient-to-r from-[var(--color-primary)] to-blue-600 p-5 sm:p-6 text-white relative overflow-hidden">
+        <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+        <div className="relative">
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold bg-white/20 rounded-full px-2.5 py-1 mb-3">
+            <TrendingUp className="w-3.5 h-3.5" />
+            Hozir trenddagi
           </div>
-          <p className="mt-0.5 text-sm text-[var(--color-muted)]">{section.description}</p>
+          <h2 className="text-lg sm:text-xl font-bold mb-1">Bu hafta 1 200+ yangi ish</h2>
+          <p className="text-blue-100 text-sm mb-4 max-w-xs">
+            Dizayn, IT, marketing va boshqa sohalardagi eng yaxshi imkoniyatlar.
+          </p>
+          <Link
+            href="/search"
+            className="inline-flex items-center text-sm font-semibold bg-white text-[var(--color-primary)] px-4 py-2 rounded-xl hover:bg-blue-50 transition-colors"
+          >
+            Barchasi ishlarni koʻrish
+          </Link>
         </div>
       </div>
 
-      <ul className="mb-5 flex flex-1 flex-col gap-1.5">
-        {section.links.map((link) => {
-          const LinkIcon = link.icon;
-          const row = (
-            <>
-              <LinkIcon className="h-4 w-4 shrink-0 text-[var(--color-muted)]" />
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-[var(--color-secondary)]">
-                  {link.label}
-                </span>
-                <span className="block truncate text-xs text-[var(--color-muted)]">
-                  {link.description}
-                </span>
-              </span>
-              {link.href ? (
-                <ChevronRight className="h-4 w-4 shrink-0 text-[var(--color-muted)]" />
-              ) : (
-                <span className="shrink-0 text-[10px] font-semibold text-[var(--color-muted)]">
-                  Tez orada
-                </span>
-              )}
-            </>
-          );
+      <QueryErrorBanner message={error} onRetry={refreshAll} />
 
-          return (
-            <li key={link.label}>
-              {link.href ? (
-                <Link
-                  href={link.href}
-                  className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] px-3 py-2.5 transition-colors hover:border-[var(--color-primary)]/30 hover:bg-[var(--color-primary-light)]/50"
-                >
-                  {row}
-                </Link>
-              ) : (
-                <div
-                  aria-disabled="true"
-                  className="flex items-center gap-3 rounded-xl border border-dashed border-[var(--color-border)] px-3 py-2.5 opacity-70"
-                >
-                  {row}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-
-      {isReady ? (
-        <Link
-          href={section.href as string}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-secondary)] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800"
-        >
-          {section.title} boʻlimiga oʻtish
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+      {isLoading ? (
+        <JobListSkeleton count={4} />
       ) : (
-        <span className="inline-flex items-center justify-center rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-[var(--color-muted)]">
-          Tez orada ochiladi
-        </span>
+        <>
+          {/* Featured jobs */}
+          {featured.data.length > 0 && (
+            <section className="mb-8">
+              <SectionHeader title="Tavsiya etilgan" href="/search" />
+              <div className="flex flex-col gap-3 sm:gap-4">
+                {featured.data.map((job, index) => (
+                  <JobCard key={job.id} job={job} index={index} featured />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Category chips */}
+          <section className="mb-6">
+            <SectionHeader title="Kategoriyalar" />
+            <CategoryChips
+              categories={categories.slice(0, 15)}
+              selected={selectedCategory}
+              onSelect={setSelectedCategory}
+            />
+          </section>
+
+          {/* Filtered job list */}
+          <section className="mb-8">
+            <SectionHeader
+              title={selectedCategory ? 'Tanlangan kategoriya' : 'Soʻnggi ishlar'}
+              href="/search"
+              linkLabel="Barchasi"
+            />
+            {filteredJobs.length > 0 ? (
+              <div className="flex flex-col gap-3 sm:gap-4">
+                {filteredJobs.map((job, index) => (
+                  <JobCard key={job.id} job={job} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[var(--color-border)] p-8 text-center">
+                <Search className="mx-auto mb-3 h-10 w-10 text-[var(--color-muted)]" />
+                <p className="text-sm font-semibold text-[var(--color-secondary)]">
+                  Bu kategoriyada hozircha ish topilmadi
+                </p>
+                <p className="mt-1 text-xs text-[var(--color-muted)]">
+                  Boshqa kategoriyani tanlang yoki barcha ishlarni koʻring
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(null)}
+                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-primary)] hover:underline"
+                >
+                  Barchasi ishlar <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </section>
+        </>
       )}
-    </article>
+    </section>
   );
 }
 
 /** The platform hub: every section branches out from here. */
 export function PlatformHub() {
-  const user = useCurrentUser();
-  const firstName = user.name.split(' ')[0];
-
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
       <HeroCarousel />
 
-      <section className="mb-8 sm:mb-10">
-        <p className="mb-2 text-sm text-[var(--color-muted)]">
-          Assalomu alaykum{firstName ? `, ${firstName}` : ''} 👋
-        </p>
-        <h1 className="max-w-2xl text-3xl font-bold tracking-tight text-[var(--color-secondary)] sm:text-4xl">
-          Uy-joy va ish — bitta platformada
-        </h1>
-        <p className="mt-3 max-w-xl text-[var(--color-muted)]">
-          Kerakli boʻlimni tanlang: uy-joy ijarasi va savdosi, ish qidirish yoki oʻz eʼloningizni
-          joylash.
-        </p>
-      </section>
+      <JobsSection />
 
-      <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
-        {PLATFORM_SECTIONS.map((section) => (
-          <SectionCard key={section.id} section={section} />
-        ))}
-      </div>
+      <ListingsSection />
     </div>
   );
 }

@@ -10,6 +10,10 @@ export type Slide = {
   image: string;
   /** Optional gradient classes: "from-… via-… to-…" */
   tone?: string;
+  /** Photo fills the whole slide (behind a dark scrim) instead of the tilted card. */
+  cover?: boolean;
+  /** Tailwind object-position for a cover photo, e.g. "object-right" to keep its subject on narrow screens. */
+  coverPosition?: string;
 };
 
 const TONES = [
@@ -108,8 +112,22 @@ export function Carousel({
             onClick={() => onSlideClick?.(s.id)}
             aria-hidden={i !== current}
             tabIndex={i === current ? 0 : -1}
-            className={`relative h-48 w-full shrink-0 bg-gradient-to-r text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white/70 sm:h-64 ${s.tone || TONES[i % TONES.length]}`}
+            className={`relative h-48 w-full shrink-0 bg-gradient-to-r text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-white/70 sm:h-64 ${s.cover ? 'bg-slate-900' : s.tone || TONES[i % TONES.length]}`}
           >
+            {s.cover && (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={s.image}
+                  alt={s.title}
+                  draggable={false}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  className={`absolute inset-0 h-full w-full object-cover ${s.coverPosition ?? 'object-[center_45%]'}`}
+                />
+                <span className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/45 to-transparent" />
+              </>
+            )}
+
             <span className="relative z-10 flex h-full max-w-[60%] flex-col justify-center px-6 sm:px-10">
               <span className="mb-1 text-[11px] font-bold uppercase tracking-wider text-teal-300 sm:text-sm">
                 {eyebrow}
@@ -131,18 +149,22 @@ export function Carousel({
               )}
             </span>
 
-            {/* Image */}
-            <span className="absolute right-0 top-0 flex h-full w-1/2 items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={s.image}
-                alt={s.title}
-                draggable={false}
-                loading={i === 0 ? 'eager' : 'lazy'}
-                className="h-[78%] w-[78%] rotate-3 rounded-2xl object-cover shadow-2xl"
-              />
-            </span>
-            <span className="absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+            {!s.cover && (
+              <>
+                {/* Image */}
+                <span className="absolute right-0 top-0 flex h-full w-1/2 items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={s.image}
+                    alt={s.title}
+                    draggable={false}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    className="h-[78%] w-[78%] rotate-3 rounded-2xl object-cover shadow-2xl"
+                  />
+                </span>
+                <span className="absolute -bottom-10 -right-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
+              </>
+            )}
           </button>
         ))}
       </div>

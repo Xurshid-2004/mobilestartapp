@@ -24,11 +24,52 @@ export interface MegaMenuGroup {
 export interface MegaMenu {
   id: string;
   label: string;
+  /** Extra links revealed by a "Yana" button under the columns. */
+  more?: MegaMenuItem[];
   /** Each column stacks one or more groups top-to-bottom. */
   columns: MegaMenuGroup[][];
   /** Shown as the panel footer ("Barchasini koʻrish"). */
   href: string;
 }
+
+/** Daily / one-off jobs — also a top-level tab in the category bar. */
+export const DAILY_JOBS_HREF = `${ROUTES.search}?q=${encodeURIComponent('kunlik')}`;
+
+/**
+ * Fields not covered by the 18 categories already in the Ish menu (duplicates removed).
+ * They open a text search until they exist as real categories.
+ */
+const MORE_JOB_CATEGORIES: [label: string, query: string][] = [
+  ['Kunlik ishlar', 'kunlik'],
+  ['Avtomobil taʼmirlash', 'avto'],
+  ['Ombor va qadoqlash', 'qadoqlash'],
+  ['Tozalash xizmatlari', 'tozalash'],
+  ['Bolalar parvarishi', 'bola'],
+  ['Keksalar parvarishi', 'keksa'],
+  ['Sugʻurta', 'sugʻurta'],
+  ['Ofis va maʼmuriy ishlar', 'ofis'],
+  ['Kadrlar va rekruting', 'kadr'],
+  ['Menejment', 'menejer'],
+  ['Mijozlarga xizmat koʻrsatish', 'mijoz'],
+  ['Call-markaz', 'call'],
+  ['Haydovchilik', 'haydovchi'],
+  ['Kuryerlik va yetkazib berish', 'kuryer'],
+  ['Sartaroshlik', 'sartarosh'],
+  ['Qishloq xoʻjaligi', 'qishloq'],
+  ['Chorvachilik', 'chorva'],
+  ['Tikuvchilik va toʻqimachilik', 'tikuvchi'],
+  ['Elektrik va elektronika', 'elektrik'],
+  ['Santexnika', 'santexnik'],
+  ['Maishiy texnika taʼmirlash', 'texnika'],
+  ['Mebel ishlab chiqarish', 'mebel'],
+  ['Hunarmandchilik', 'hunarmand'],
+  ['Media va jurnalistika', 'jurnalist'],
+  ['Foto va videografiya', 'video'],
+  ['Kontent yaratish', 'kontent'],
+  ['Tarjima xizmatlari', 'tarjima'],
+  ['Muhandislik', 'muhandis'],
+  ['Energetika', 'energetika'],
+];
 
 const q = (base: string, params: Record<string, string>) =>
   `${base}?${new URLSearchParams(params).toString()}`;
@@ -189,6 +230,10 @@ export const MEGA_MENUS: MegaMenu[] = [
     id: 'ish',
     label: 'Ish',
     href: ROUTES.jobs,
+    more: MORE_JOB_CATEGORIES.map(([label, query]) => ({
+      label,
+      href: `${ROUTES.search}?q=${encodeURIComponent(query)}`,
+    })),
     columns: [
       ...chunk(jobCategories.slice(0, 18), 6).map((items, i) => [
         {
@@ -206,7 +251,7 @@ export const MEGA_MENUS: MegaMenu[] = [
             { label: 'Barcha vakansiyalar', href: ROUTES.search },
             { label: 'Yaqinimdagi ishlar', href: ROUTES.map },
             { label: 'Barcha kategoriyalar', href: '/categories' },
-            { label: 'Vakansiya joylash', href: ROUTES.create },
+            { label: 'Vakansiya joylash', href: ROUTES.createJob },
           ],
         },
       ],

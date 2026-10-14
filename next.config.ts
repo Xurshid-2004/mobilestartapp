@@ -14,6 +14,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Hide the dev-only "N" / "Compiling…" badge; compile and runtime errors still show.
+  devIndicators: false,
   async headers() {
     return [
       {

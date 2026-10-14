@@ -51,7 +51,7 @@ export function CreateJobWizard({ editJobId }: { editJobId?: string }) {
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="min-w-0">
               <h1 className="truncate text-xl font-black text-[var(--color-secondary)] sm:text-2xl">
-                {isEditing ? 'Eʼlonni tahrirlash' : 'Ish joylash'}
+                {isEditing ? 'Eʼlonni tahrirlash' : 'Ish eʼloni'}
               </h1>
               <p className="mt-1 text-sm font-medium text-[var(--color-muted)]">
                 {stepMeta.current}-qadam / {stepMeta.total} · {stepMeta.label}

@@ -23,13 +23,27 @@ export const ROUTES = {
   favorites: '/favorites',
   applications: '/applications',
   applicants: '/applicants',
+  /** Single posting entry — asks Ish or Uy-joy first. */
   create: '/create',
+  createJob: '/create?tur=ish',
+  createListing: '/create?tur=uy-joy',
   chat: '/chat',
   settings: '/settings',
   profile: '/profile',
+  myJobs: '/my-jobs',
+  notifications: '/notifications',
+  categories: '/categories',
+  /** Uy-joy listings — placeholders until the listing UI ships (see app/uy-joy/[bolim]). */
+  uyJoy: {
+    sale: '/uy-joy/sotuv',
+    rent: '/uy-joy/ijara',
+    buy: '/uy-joy/olish',
+    newBuildings: '/uy-joy/yangi-uylar',
+  },
   login: '/login',
   register: '/register',
   job: (id: string) => `/job/${id}`,
+  listing: (id: string) => `/uy-joy/elon/${id}`,
   chatThread: (id: string) => `/chat/${id}`,
 } as const;
 
