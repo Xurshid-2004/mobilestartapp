@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { ListingCard } from './ListingCard';
 import { DemoBadge } from './DemoBadge';
 import { useUserListings } from '@/lib/listings/user-listings';
+import { useListingModeration } from '@/lib/listings/moderation';
 
 type DealFilter = 'all' | ListingDeal | 'olish';
 
@@ -24,9 +25,16 @@ const FILTERS: { id: DealFilter; label: string }[] = [
 export function ListingsSection() {
   const [filter, setFilter] = useState<DealFilter>('all');
   const userListings = useUserListings();
+  const { isVisible } = useListingModeration();
   // Listings posted from this browser come first, then the demo ones.
   const listings = [...userListings, ...DEMO_LISTINGS].filter((l) =>
-    filter === 'all' ? true : filter === 'olish' ? l.seeking : !l.seeking && l.deal === filter
+    !isVisible(l.id)
+      ? false
+      : filter === 'all'
+        ? true
+        : filter === 'olish'
+          ? l.seeking
+          : !l.seeking && l.deal === filter,
   );
 
   return (
@@ -62,7 +70,7 @@ export function ListingsSection() {
                 'min-h-9 rounded-lg px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-gold)]/70',
                 filter === f.id
                   ? 'bg-[var(--color-brand-green)] text-white shadow-sm'
-                  : 'text-[var(--color-muted)] hover:text-[var(--color-secondary)]'
+                  : 'text-[var(--color-muted)] hover:text-[var(--color-secondary)]',
               )}
             >
               {f.label}

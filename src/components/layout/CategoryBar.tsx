@@ -3,10 +3,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, CalendarClock, ChevronDown, Map as MapIcon } from 'lucide-react';
+import { ArrowRight, Briefcase, Building2, CalendarClock, ChevronDown, Map as MapIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/navigation/routes';
 import { DAILY_JOBS_HREF, MEGA_MENUS, type MegaMenu } from '@/lib/navigation/mega-menu';
+import type { PlatformMode } from '@/lib/navigation/platform';
+
+const JOBS_MENU_ID = 'ish';
+
+/** Uy-joy mode: housing menus only (Ish is a mode switch). Ish mode: the jobs menu only. */
+const menusFor = (mode: PlatformMode) =>
+  MEGA_MENUS.filter((m) => (mode === 'ish' ? m.id === JOBS_MENU_ID : m.id !== JOBS_MENU_ID));
+
+const linkTabClass =
+  'relative inline-flex h-12 items-center gap-2 rounded-t-xl border border-b-0 border-transparent px-5 text-[15px] font-bold text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-brand-gold)]/70';
 
 const OPEN_DELAY_MS = 90;
 const CLOSE_DELAY_MS = 160;
@@ -102,8 +112,12 @@ function MegaPanel({ menu, onNavigate }: { menu: MegaMenu; onNavigate: () => voi
   );
 }
 
-/** Desktop category bar with click/hover mega-menus, under the platform navbar. */
-export function CategoryBar() {
+/**
+ * Desktop category bar under the platform navbar. In Uy-joy mode the "Ish" tab switches the
+ * site to Ish mode (/home/ish); in Ish mode only job menus are shown.
+ */
+export function CategoryBar({ mode }: { mode: PlatformMode }) {
+  const menus = menusFor(mode);
   const [openId, setOpenId] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const barRef = useRef<HTMLDivElement>(null);
@@ -149,7 +163,7 @@ export function CategoryBar() {
     };
   }, [openId]);
 
-  const openMenu = MEGA_MENUS.find((m) => m.id === openId);
+  const openMenu = menus.find((m) => m.id === openId);
 
   return (
     <div
@@ -159,8 +173,16 @@ export function CategoryBar() {
       className="relative mx-auto hidden max-w-7xl items-end px-4 sm:px-6 lg:flex"
     >
       <nav aria-label="Kategoriyalar" className="flex items-end gap-1">
-        {MEGA_MENUS.map((menu) => {
+        {mode === 'ish' && (
+          <Link href={ROUTES.home} onClick={close} className={linkTabClass}>
+            <Building2 className="h-[18px] w-[18px] text-[var(--nav-accent)]" />
+            Uy-joy
+          </Link>
+        )}
+        {menus.map((menu) => {
           const isOpen = openId === menu.id;
+          // In Ish mode the jobs tab is the current section.
+          const isCurrent = mode === 'ish' && menu.id === JOBS_MENU_ID;
           return (
             <button
               key={menu.id}
@@ -179,34 +201,48 @@ export function CategoryBar() {
                 'relative inline-flex h-12 items-center gap-2 rounded-t-xl px-5 text-[15px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-brand-gold)]/70',
                 isOpen
                   ? 'relative z-[60] -mb-px border border-b-0 border-[var(--nav-tab-open-border)] bg-white text-[var(--color-secondary)]'
-                  : 'border border-b-0 border-transparent text-[var(--nav-fg-muted)] hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]'
+                  : isCurrent
+                    ? 'border border-b-0 border-transparent text-[var(--nav-hover-fg)] hover:bg-[var(--nav-hover)]'
+                    : 'border border-b-0 border-transparent text-[var(--nav-fg-muted)] hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]'
               )}
             >
+              {isCurrent && <Briefcase className="h-[18px] w-[18px] text-[var(--nav-accent)]" />}
               {menu.label}
               <ChevronDown
                 className={cn('h-4 w-4 transition-transform duration-200', isOpen && 'rotate-180')}
                 strokeWidth={2.5}
               />
+              {isCurrent && !isOpen && (
+                <span
+                  aria-hidden
+                  className="absolute inset-x-4 bottom-0 h-[3px] rounded-t-full bg-[var(--nav-accent)]"
+                />
+              )}
             </button>
           );
         })}
-        <Link
-          href={DAILY_JOBS_HREF}
-          onClick={close}
-          className="relative inline-flex h-12 items-center gap-2 rounded-t-xl border border-b-0 border-transparent px-5 text-[15px] font-bold text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-brand-gold)]/70"
-        >
+        {mode === 'uy-joy' && (
+          <Link href={ROUTES.jobs} onClick={close} className={linkTabClass}>
+            <Briefcase className="h-[18px] w-[18px] text-[var(--nav-accent)]" />
+            Ish
+          </Link>
+        )}
+        <Link href={DAILY_JOBS_HREF} onClick={close} className={linkTabClass}>
           <CalendarClock className="h-[18px] w-[18px] text-[var(--nav-accent)]" />
           Kunlik ish
         </Link>
       </nav>
 
-      <Link
-        href={ROUTES.map}
-        className="mb-2 ml-auto inline-flex h-9 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]"
-      >
-        <MapIcon className="h-4 w-4 text-[var(--nav-accent)]" />
-        Xaritadan qidirish
-      </Link>
+      {mode === 'ish' && (
+        <Link
+          href={ROUTES.map}
+          onClick={close}
+          className="mb-2 ml-auto inline-flex h-9 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]"
+        >
+          <MapIcon className="h-4 w-4 text-[var(--nav-accent)]" />
+          Xaritadan qidirish
+        </Link>
+      )}
 
       <AnimatePresence>
         {openMenu && (
@@ -219,8 +255,8 @@ export function CategoryBar() {
             transition={{ duration: 0.15, ease: 'easeOut' }}
             className={cn(
               'absolute left-4 right-4 top-full z-50 max-h-[calc(100dvh-9rem)] overflow-y-auto rounded-b-2xl rounded-tr-2xl border border-[var(--nav-tab-open-border)] bg-white text-[var(--color-secondary)] shadow-[0_24px_60px_-12px_var(--nav-shadow)] sm:left-6 sm:right-6',
-              // The first tab sits flush on the panel's left edge; others need a rounded corner.
-              openMenu.id !== MEGA_MENUS[0].id && 'rounded-tl-2xl'
+              // Only the very first tab sits flush on the panel's left edge (Ish mode starts with "Uy-joy").
+              (mode === 'ish' || openMenu.id !== menus[0]?.id) && 'rounded-tl-2xl'
             )}
           >
             {/* Re-keyed per menu so switching tabs swaps content without replaying the exit. */}
@@ -234,9 +270,11 @@ export function CategoryBar() {
   );
 }
 
-/** Same menus as accordions, for the mobile sheet. */
-export function MobileCategoryMenu({ onNavigate }: { onNavigate: () => void }) {
-  const [expanded, setExpanded] = useState<string | null>(null);
+/** Same menus as accordions, for the mobile sheet — filtered by mode like the desktop bar. */
+export function MobileCategoryMenu({ mode, onNavigate }: { mode: PlatformMode; onNavigate: () => void }) {
+  const menus = menusFor(mode);
+  // In Ish mode the single jobs menu starts open.
+  const [expanded, setExpanded] = useState<string | null>(mode === 'ish' ? JOBS_MENU_ID : null);
   const [moreOpen, setMoreOpen] = useState(false);
 
   return (
@@ -244,7 +282,7 @@ export function MobileCategoryMenu({ onNavigate }: { onNavigate: () => void }) {
       <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-wider text-[var(--nav-fg-subtle)]">
         Kategoriyalar
       </p>
-      {MEGA_MENUS.map((menu) => {
+      {menus.map((menu) => {
         const isOpen = expanded === menu.id;
         return (
           <div key={menu.id}>
@@ -324,6 +362,16 @@ export function MobileCategoryMenu({ onNavigate }: { onNavigate: () => void }) {
         <CalendarClock className="h-4 w-4 text-[var(--nav-accent)]" />
         Kunlik ish
       </Link>
+      {mode === 'ish' && (
+        <Link
+          href={ROUTES.map}
+          onClick={onNavigate}
+          className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 py-2.5 text-sm font-semibold hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]"
+        >
+          <MapIcon className="h-4 w-4 text-[var(--nav-accent)]" />
+          Ishlar xaritasi
+        </Link>
+      )}
     </div>
   );
 }

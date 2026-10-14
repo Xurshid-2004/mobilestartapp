@@ -33,7 +33,7 @@ export interface MegaMenu {
 }
 
 /** Daily / one-off jobs — also a top-level tab in the category bar. */
-export const DAILY_JOBS_HREF = `${ROUTES.search}?q=${encodeURIComponent('kunlik')}`;
+export const DAILY_JOBS_HREF = `${ROUTES.jobs}?q=${encodeURIComponent('kunlik')}`;
 
 /**
  * Fields not covered by the 18 categories already in the Ish menu (duplicates removed).
@@ -232,7 +232,7 @@ export const MEGA_MENUS: MegaMenu[] = [
     href: ROUTES.jobs,
     more: MORE_JOB_CATEGORIES.map(([label, query]) => ({
       label,
-      href: `${ROUTES.search}?q=${encodeURIComponent(query)}`,
+      href: `${ROUTES.jobs}?q=${encodeURIComponent(query)}`,
     })),
     columns: [
       ...chunk(jobCategories.slice(0, 18), 6).map((items, i) => [
@@ -240,7 +240,7 @@ export const MEGA_MENUS: MegaMenu[] = [
           title: i === 0 ? 'Kategoriyalar' : ' ',
           items: items.map((c) => ({
             label: c.name,
-            href: `${ROUTES.search}?category=${encodeURIComponent(c.slug)}`,
+            href: `${ROUTES.jobs}?category=${encodeURIComponent(c.slug)}`,
           })),
         },
       ]),
@@ -248,7 +248,7 @@ export const MEGA_MENUS: MegaMenu[] = [
         {
           title: 'Tezkor',
           items: [
-            { label: 'Barcha vakansiyalar', href: ROUTES.search },
+            { label: 'Barcha vakansiyalar', href: ROUTES.jobs },
             { label: 'Yaqinimdagi ishlar', href: ROUTES.map },
             { label: 'Barcha kategoriyalar', href: '/categories' },
             { label: 'Vakansiya joylash', href: ROUTES.createJob },

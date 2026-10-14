@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { describe, expect, it } from 'vitest';
-import { getActiveSectionId, HUB_SECTIONS, PLATFORM_SECTIONS } from '@/lib/navigation/platform';
+import { getActiveSectionId, getPlatformMode, HUB_SECTIONS, PLATFORM_SECTIONS } from '@/lib/navigation/platform';
 import { MEGA_MENUS } from '@/lib/navigation/mega-menu';
 
 /** Every app route as a regex, built from src/app/**\/page.tsx (route groups dropped). */
@@ -83,7 +83,8 @@ describe('platform sections', () => {
 describe('getActiveSectionId', () => {
   it('maps pages to their section', () => {
     expect(getActiveSectionId('/uy-joy/sotuv')).toBe('uy-joy');
-    expect(getActiveSectionId('/ish')).toBe('ish');
+    expect(getActiveSectionId('/home/ish')).toBe('ish');
+    expect(getActiveSectionId('/home/ish/xarita')).toBe('ish');
     expect(getActiveSectionId('/search')).toBe('ish');
     expect(getActiveSectionId('/job/42')).toBe('ish');
     expect(getActiveSectionId('/chat/abc')).toBe('account');
@@ -98,5 +99,15 @@ describe('getActiveSectionId', () => {
 
   it('does not match on a shared prefix only', () => {
     expect(getActiveSectionId('/ishonch')).toBeNull();
+  });
+});
+
+describe('getPlatformMode', () => {
+  it('switches to Ish mode only on the jobs views of home', () => {
+    expect(getPlatformMode('/home/ish')).toBe('ish');
+    expect(getPlatformMode('/home/ish/xarita')).toBe('ish');
+    expect(getPlatformMode('/home')).toBe('uy-joy');
+    expect(getPlatformMode('/uy-joy/sotuv')).toBe('uy-joy');
+    expect(getPlatformMode('/home/ishonch')).toBe('uy-joy');
   });
 });

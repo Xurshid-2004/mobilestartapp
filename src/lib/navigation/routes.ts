@@ -16,10 +16,11 @@ import {
 export const ROUTES = {
   /** Platform hub — every section (Uy-joy, Ish, Account) branches out from here. */
   home: '/home',
-  /** Ish (jobs) section landing. */
-  jobs: '/ish',
+  /** Ish rejimi — bosh sahifa navbar ostida faqat ish eʼlonlarini koʻrsatadi (`/ish` shu yerga yoʻnaltiriladi). */
+  jobs: '/home/ish',
   search: '/search',
-  map: '/map',
+  /** Ishlar xaritasi, Ish rejimining bir koʻrinishi (`/map` shu yerga yoʻnaltiriladi). */
+  map: '/home/ish/xarita',
   favorites: '/favorites',
   applications: '/applications',
   applicants: '/applicants',
@@ -58,7 +59,7 @@ export interface NavItemConfig {
 export const MOBILE_NAV_ITEMS: NavItemConfig[] = [
   { href: ROUTES.home, icon: Home, label: 'Asosiy' },
   { href: ROUTES.jobs, icon: Briefcase, label: 'Ishlar' },
-  { href: ROUTES.create, icon: Plus, label: 'Joylash', isCenter: true },
+  { href: ROUTES.createJob, icon: Plus, label: 'Joylash', isCenter: true },
   { href: ROUTES.chat, icon: MessageCircle, label: 'Suhbat' },
   { href: ROUTES.settings, icon: Settings, label: 'Sozlama' },
 ];

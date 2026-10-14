@@ -11,7 +11,7 @@ function seed(): AppNotification[] {
       kind: 'system',
       title: 'HamJoy’ga xush kelibsiz! 🎉',
       body: 'Yaqinimdagi ishlar bo‘limidan eng yaqin ishlarni toping.',
-      link: '/map',
+      link: '/home/ish/xarita',
       read: false,
       createdAt: iso(30),
     },

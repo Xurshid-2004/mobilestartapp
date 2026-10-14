@@ -105,7 +105,7 @@ export const PLATFORM_SECTIONS: PlatformSection[] = [
         label: 'Ish qidirish',
         description: 'Filtr va xarita bilan vakansiyalar',
         icon: Search,
-        href: ROUTES.search,
+        href: ROUTES.jobs,
       },
       {
         label: 'Vakansiya joylash',
@@ -165,4 +165,12 @@ export const HUB_SECTIONS = PLATFORM_SECTIONS.filter((s) => s.id !== 'account');
 export function getActiveSectionId(pathname: string | null): PlatformSectionId | null {
   const section = PLATFORM_SECTIONS.find((s) => s.paths.some((p) => isRouteActive(pathname, p)));
   return section?.id ?? null;
+}
+
+/** The platform navbar shows either housing or jobs, never both at once. */
+export type PlatformMode = 'uy-joy' | 'ish';
+
+/** Ish mode = /home/ish and its views (list, map); every other platform page is Uy-joy. */
+export function getPlatformMode(pathname: string | null): PlatformMode {
+  return isRouteActive(pathname, ROUTES.jobs) ? 'ish' : 'uy-joy';
 }

@@ -32,6 +32,7 @@ import {
 } from '@/lib/validations/listing.validation';
 import type { ListingIntent, ListingPropertyType } from '@/types/listing';
 import { IntentNav } from '@/components/listings/IntentNav';
+import { sideAsideScrollClass } from '@/components/listings/side-nav-styles';
 
 const GREEN_THEME = {
   '--color-primary': 'var(--color-brand-green)',
@@ -197,7 +198,7 @@ export function CreateListingForm({ initialIntent = 'sotuv' }: { initialIntent?:
 
       <form onSubmit={submit} noValidate className="flex-1 px-4 py-4 pb-28 sm:px-6 sm:py-5 lg:pb-8">
         <div className="mx-auto max-w-7xl lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:items-start lg:gap-6">
-          <aside className="mb-4 lg:sticky lg:top-24 lg:mb-0">
+          <aside className={cn('mb-4 lg:sticky lg:top-28 lg:mb-0 lg:max-h-[calc(100dvh-8rem)]', sideAsideScrollClass)}>
             <div className="lg:card lg:rounded-2xl lg:p-3">
               <p className="mb-2 hidden px-3.5 pt-1 text-lg font-bold text-[var(--color-secondary)] lg:block">
                 Eʼlon turi

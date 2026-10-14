@@ -14,3 +14,10 @@ export const sideIconClass = 'h-[18px] w-[18px] shrink-0 lg:h-[22px] lg:w-[22px]
 export const sideGroupLabelClass = 'mb-1.5 hidden px-3.5 text-[15px] font-semibold text-gray-500 lg:block';
 export const sideRowClass =
   '-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 lg:flex-col lg:gap-0.5 lg:overflow-visible';
+
+/**
+ * Desktop left column: sticks under the page header and scrolls on its own when the menu is
+ * taller than the screen, so its last items are always reachable without scrolling the page.
+ */
+export const sideAsideScrollClass =
+  'lg:overflow-y-auto lg:overscroll-contain lg:rounded-2xl [scrollbar-width:thin]';

@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/navigation/routes';
-import { PLATFORM_SECTIONS, type PlatformLink } from '@/lib/navigation/platform';
+import { getPlatformMode, PLATFORM_SECTIONS, type PlatformLink, type PlatformMode } from '@/lib/navigation/platform';
 import { useNotifications } from '@/context/NotificationsContext';
 import { useFavorites } from '@/context/FavoritesContext';
 import { useAuth } from '@/context/AuthContext';
@@ -189,13 +189,45 @@ function NavAction({
   );
 }
 
+/** Mobile: the desktop tab row is hidden, so the Uy-joy / Ish switch sits above the search. */
+function ModeSwitch({ mode, onNavigate }: { mode: PlatformMode; onNavigate: () => void }) {
+  const options: { id: PlatformMode; href: string; label: string; icon: typeof Building2 }[] = [
+    { id: 'uy-joy', href: ROUTES.home, label: 'Uy-joy', icon: Building2 },
+    { id: 'ish', href: ROUTES.jobs, label: 'Ish', icon: Briefcase },
+  ];
+  return (
+    <nav aria-label="Boʻlim" className="mb-3 grid grid-cols-2 gap-1 rounded-xl border border-[var(--nav-border)] p-1">
+      {options.map(({ id, href, label, icon: Icon }) => (
+        <Link
+          key={id}
+          href={href}
+          onClick={onNavigate}
+          aria-current={mode === id ? 'page' : undefined}
+          className={cn(
+            'flex min-h-10 items-center justify-center gap-2 rounded-lg text-sm font-bold transition-colors',
+            mode === id
+              ? 'bg-[var(--nav-accent)] text-[var(--nav-bg)]'
+              : 'text-[var(--nav-fg-muted)] hover:bg-[var(--nav-hover)] hover:text-[var(--nav-hover-fg)]',
+            focusRing
+          )}
+        >
+          <Icon className="h-4 w-4" />
+          {label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 function NavSearch({
   className,
   onSubmitted,
+  placeholder,
   enableShortcut = false,
 }: {
   className?: string;
   onSubmitted: () => void;
+  placeholder: string;
   /** Focus with "/" — only on the desktop instance so two inputs don't compete. */
   enableShortcut?: boolean;
 }) {
@@ -221,7 +253,8 @@ function NavSearch({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const q = query.trim();
-    router.push(q ? `${ROUTES.search}?q=${encodeURIComponent(q)}` : ROUTES.search);
+    // Results open in Ish mode, under this navbar.
+    router.push(q ? `${ROUTES.jobs}?q=${encodeURIComponent(q)}` : ROUTES.jobs);
     inputRef.current?.blur();
     onSubmitted();
   };
@@ -234,7 +267,7 @@ function NavSearch({
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Uy, ish qidiring..."
+        placeholder={placeholder}
         aria-label="Qidirish"
         enterKeyHint="search"
         className="h-11 w-full rounded-full border border-[var(--nav-border)] bg-[var(--nav-field)] pl-11 pr-12 text-sm text-[var(--nav-fg)] outline-none transition-[border-color,background-color,box-shadow] placeholder:text-[var(--nav-fg-subtle)] hover:border-[var(--nav-fg-subtle)]/40 focus:border-[var(--color-brand-gold)]/60 focus:bg-[var(--nav-field-focus)] focus:shadow-[0_0_0_4px_rgb(217_178_95/0.12)] [&::-webkit-search-cancel-button]:hidden"
@@ -264,6 +297,11 @@ function NavSearch({
 
 export function PlatformNavbar() {
   const pathname = usePathname();
+  // Ish mode shows jobs only: no Sotuv / Ijara tabs, posting, or housing menu entries.
+  const mode = getPlatformMode(pathname);
+  const searchPlaceholder = mode === 'ish' ? 'Ish yoki kompaniya qidiring...' : 'Uy, ish qidiring...';
+  const postLinks = mode === 'ish' ? POST_LINKS.filter((l) => l.href === ROUTES.createJob) : POST_LINKS;
+  const menuSections = mode === 'ish' ? PLATFORM_SECTIONS.filter((s) => s.id !== 'uy-joy') : PLATFORM_SECTIONS;
   const user = useCurrentUser();
   const { unreadCount } = useNotifications();
   const { favoriteIds } = useFavorites();
@@ -440,7 +478,12 @@ export function PlatformNavbar() {
             </button>
           </div>
 
-          <NavSearch className="mx-3 hidden max-w-2xl flex-1 lg:block" onSubmitted={closeAll} enableShortcut />
+          <NavSearch
+            className="mx-3 hidden max-w-2xl flex-1 lg:block"
+            onSubmitted={closeAll}
+            placeholder={searchPlaceholder}
+            enableShortcut
+          />
 
           <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
             {isAuthenticated ? (
@@ -515,7 +558,7 @@ export function PlatformNavbar() {
                     <p className="px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wider text-[var(--nav-fg-subtle)]">
                       Nima joylaysiz?
                     </p>
-                    {POST_LINKS.map((link) => (
+                    {postLinks.map((link) => (
                       <MenuLink key={link.label} link={link} onNavigate={closeAll} />
                     ))}
                   </motion.div>
@@ -541,11 +584,12 @@ export function PlatformNavbar() {
         </div>
 
         {/* Category mega-menus (desktop) */}
-        <CategoryBar />
+        <CategoryBar mode={mode} />
 
         {/* Below lg the search gets its own full-width row */}
         <div className="px-4 pb-3 sm:px-6 lg:hidden">
-          <NavSearch onSubmitted={closeAll} />
+          <ModeSwitch mode={mode} onNavigate={closeAll} />
+          <NavSearch onSubmitted={closeAll} placeholder={searchPlaceholder} />
         </div>
 
         {/* Thin brand accent line */}
@@ -587,7 +631,7 @@ export function PlatformNavbar() {
                   Saqlanganlar
                 </Link>
 
-                {PLATFORM_SECTIONS.map((section) => (
+                {menuSections.map((section) => (
                   <div key={section.id} className="mt-3 border-t border-[var(--nav-border)] pt-3">
                     <p className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-wider text-[var(--nav-fg-subtle)]">
                       {section.title}
@@ -598,7 +642,7 @@ export function PlatformNavbar() {
                   </div>
                 ))}
 
-                <MobileCategoryMenu onNavigate={closeAll} />
+                <MobileCategoryMenu mode={mode} onNavigate={closeAll} />
 
                 <div className="mt-4 grid grid-cols-2 gap-2 border-t border-[var(--nav-border)] pt-4">
                   <button

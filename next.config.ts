@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Hide the dev-only "N" / "Compiling…" badge; compile and runtime errors still show.
   devIndicators: false,
+  async redirects() {
+    // Old job pages now live under the persistent navbar on /home.
+    return [
+      { source: '/ish', destination: '/home/ish', permanent: false },
+      { source: '/map', destination: '/home/ish/xarita', permanent: false },
+    ];
+  },
   async headers() {
     return [
       {

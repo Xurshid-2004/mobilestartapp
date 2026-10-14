@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { AUTH_ROLE_COOKIE, AUTH_SESSION_COOKIE } from '@/lib/auth/session-cookie';
+import { AUTH_SESSION_COOKIE } from '@/lib/auth/session-cookie';
 
 const PROTECTED_PREFIXES = [
   '/create',
@@ -33,17 +33,7 @@ export function proxy(request: NextRequest) {
   }
 
   const hasSession = request.cookies.get(AUTH_SESSION_COOKIE)?.value === '1';
-  const role = request.cookies.get(AUTH_ROLE_COOKIE)?.value;
-
-  if (pathname.startsWith('/admin')) {
-    if (!hasSession || role !== 'admin') {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      url.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(url);
-    }
-    return NextResponse.next();
-  }
+  // /admin has its own staff login (src/lib/admin/access.ts), so site sessions don't gate it.
 
   if (isProtectedPath(pathname) && !hasSession) {
     const url = request.nextUrl.clone();
@@ -58,7 +48,6 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     '/',
-    '/admin/:path*',
     '/create',
     '/favorites',
     '/profile/:path*',

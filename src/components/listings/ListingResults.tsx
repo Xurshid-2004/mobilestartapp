@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { DEMO_LISTINGS } from '@/data/listings';
 import { filterListings, type ListingSearchParams, type ListingSection } from '@/lib/listings/format';
 import { useUserListings } from '@/lib/listings/user-listings';
+import { useListingModeration } from '@/lib/listings/moderation';
 import { ROUTES } from '@/lib/navigation/routes';
 import { ListingCard } from './ListingCard';
 
@@ -19,7 +20,8 @@ export function ListingResults({
   resetHref: string;
 }) {
   const userListings = useUserListings();
-  const results = filterListings([...userListings, ...DEMO_LISTINGS], section, params);
+  const { isVisible } = useListingModeration();
+  const results = filterListings([...userListings, ...DEMO_LISTINGS].filter((l) => isVisible(l.id)), section, params);
   const hasFilters = Object.keys(params).length > 0;
 
   if (results.length === 0) {
